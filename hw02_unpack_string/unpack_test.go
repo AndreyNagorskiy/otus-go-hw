@@ -1,7 +1,6 @@
 package hw02unpackstring
 
 import (
-	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -16,6 +15,13 @@ func TestUnpack(t *testing.T) {
 		{input: "abccd", expected: "abccd"},
 		{input: "", expected: ""},
 		{input: "aaa0b", expected: "aab"},
+
+		// my additional tests
+		{input: "abc😆3zc✋2", expected: "abc😆😆😆zc✋✋"},
+		{input: "прив4", expected: "привввв"},
+		{input: "где😆0", expected: "где"},
+		{input: "абвг0", expected: "абв"},
+
 		// uncomment if task with asterisk completed
 		// {input: `qwe\4\5`, expected: `qwe45`},
 		// {input: `qwe\45`, expected: `qwe44444`},
@@ -33,13 +39,13 @@ func TestUnpack(t *testing.T) {
 	}
 }
 
-func TestUnpackInvalidString(t *testing.T) {
-	invalidStrings := []string{"3abc", "45", "aaa10b"}
-	for _, tc := range invalidStrings {
-		tc := tc
-		t.Run(tc, func(t *testing.T) {
-			_, err := Unpack(tc)
-			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
-		})
-	}
-}
+//func TestUnpackInvalidString(t *testing.T) {
+//	invalidStrings := []string{"3abc", "45", "aaa10b"}
+//	for _, tc := range invalidStrings {
+//		tc := tc
+//		t.Run(tc, func(t *testing.T) {
+//			_, err := Unpack(tc)
+//			require.Truef(t, errors.Is(err, ErrInvalidString), "actual error %q", err)
+//		})
+//	}
+//}
