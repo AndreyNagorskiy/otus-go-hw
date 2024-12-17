@@ -9,8 +9,6 @@ import (
 
 var ErrInvalidString = errors.New("invalid string")
 
-const zeroRune = '0'
-
 func Unpack(input string) (string, error) {
 	var resBuilder strings.Builder
 	var lastChar rune
@@ -21,11 +19,9 @@ func Unpack(input string) (string, error) {
 				return "", ErrInvalidString
 			}
 
-			if char == zeroRune && resBuilder.Len() > 0 {
+			if char == '0' && resBuilder.Len() > 0 {
 				runesRes := []rune(resBuilder.String())
-				if len(runesRes) > 0 {
-					runesRes = runesRes[:len(runesRes)-1]
-				}
+				runesRes = runesRes[:len(runesRes)-1]
 
 				resBuilder.Reset()
 				resBuilder.WriteString(string(runesRes))
@@ -33,15 +29,12 @@ func Unpack(input string) (string, error) {
 				continue
 			}
 
-			repeatCount, err := strconv.Atoi(string(char))
-			if err != nil {
-				continue
-			}
-
+			repeatCount, _ := strconv.Atoi(string(char))
 			resBuilder.WriteString(strings.Repeat(string(lastChar), repeatCount-1))
 		} else {
 			resBuilder.WriteRune(char)
 		}
+
 		lastChar = char
 	}
 
