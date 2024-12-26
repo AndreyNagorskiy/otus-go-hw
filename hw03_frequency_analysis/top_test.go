@@ -107,6 +107,16 @@ func TestTop10WithAdditionalAsteriskConditions(t *testing.T) {
 			input:    "------- - ",
 			expected: []string{"-------"}, // 1
 		},
+		{
+			name:     "Test with unicode emojis",
+			input:    "🙂, 🙂 🙂🙂 🙂🙂 😃 😃 🙂🙂",
+			expected: []string{"🙂🙂", "😃", "🙂"}, // 3, 2, 2, 2
+		},
+		{
+			name:     "Test with chinese characters",
+			input:    "我们在这里! 我们在这里 这里",
+			expected: []string{"我们在这里", "这里"}, // 2, 1
+		},
 	}
 
 	for _, tt := range tests {

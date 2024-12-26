@@ -8,6 +8,11 @@ import (
 
 const WordsLimit = 10
 
+var (
+	invalidCharsRegex = regexp.MustCompile(`^[^\p{L}\p{N}\p{So}]+|[^\p{L}\p{N}\p{So}]+$`)
+	hyphenRegex       = regexp.MustCompile(`^-+$`)
+)
+
 func Top10(text string) []string {
 	if text == "" {
 		return nil
@@ -44,7 +49,13 @@ func topWords(wordCounts map[string]int, limit int) []string {
 		limit = len(keys)
 	}
 
-	return keys[:limit]
+	res := make([]string, 0, limit)
+
+	for i := 0; i < limit; i++ {
+		res = append(res, keys[i])
+	}
+
+	return res
 }
 
 func formatWord(w string) string {
@@ -52,13 +63,13 @@ func formatWord(w string) string {
 		return w
 	}
 
-	re := regexp.MustCompile(`^[^a-zA-Zа-яА-Я0-9]+|[^a-zA-Zа-яА-Я0-9]+$`)
 	w = strings.ToLower(strings.TrimSpace(w))
-	return re.ReplaceAllString(w, "")
+
+	return invalidCharsRegex.ReplaceAllString(w, "")
 }
 
 func isHyphenString(s string) bool {
-	return regexp.MustCompile(`^-+$`).MatchString(s)
+	return hyphenRegex.MatchString(s)
 }
 
 func isValidWord(w string) bool {
