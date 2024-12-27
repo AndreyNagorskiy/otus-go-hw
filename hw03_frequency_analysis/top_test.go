@@ -7,7 +7,7 @@ import (
 )
 
 // Change to true if needed.
-var taskWithAsteriskIsCompleted = false
+var taskWithAsteriskIsCompleted = true
 
 var text = `Как видите, он  спускается  по  лестнице  вслед  за  своим
 	другом   Кристофером   Робином,   головой   вниз,  пересчитывая
@@ -79,4 +79,49 @@ func TestTop10(t *testing.T) {
 			require.Equal(t, expected, Top10(text))
 		}
 	})
+}
+
+func TestTop10WithAdditionalAsteriskConditions(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected []string
+	}{
+		{
+			name:     "Test with multiple 'нога'",
+			input:    "Нога нога нога! нога,  'нога' ",
+			expected: []string{"нога"}, // 5
+		},
+		{
+			name:     "Test with 'какой-то' and 'какойто'",
+			input:    "какой-то какойто",
+			expected: []string{"какой-то", "какойто"}, // 1, 1
+		},
+		{
+			name:     "Test with mixed dog and cat terms",
+			input:    "dog,cat dog...cat dogcat",
+			expected: []string{"dog,cat", "dog...cat", "dogcat"}, // 1, 1, 1
+		},
+		{
+			name:     "Test with long dashes",
+			input:    "------- - ",
+			expected: []string{"-------"}, // 1
+		},
+		{
+			name:     "Test with unicode emojis",
+			input:    "🙂, 🙂 🙂🙂 🙂🙂 😃 😃 🙂🙂",
+			expected: []string{"🙂🙂", "😃", "🙂"}, // 3, 2, 2, 2
+		},
+		{
+			name:     "Test with chinese characters",
+			input:    "我们在这里! 我们在这里 这里",
+			expected: []string{"我们在这里", "这里"}, // 2, 1
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			require.Equal(t, tt.expected, Top10(tt.input))
+		})
+	}
 }
