@@ -48,4 +48,24 @@ func TestList(t *testing.T) {
 		}
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})
+
+	t.Run("operations with nil value", func(t *testing.T) {
+		l := NewList()
+
+		l.Remove(nil)
+		l.MoveToFront(nil)
+
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+
+		l.PushFront(nil)
+
+		require.Equal(t, 1, l.Len())
+		require.Nil(t, l.Front().Value)
+
+		l.PushBack(nil)
+		require.Equal(t, 2, l.Len())
+		require.Nil(t, l.Back().Value)
+	})
 }
