@@ -18,6 +18,22 @@ func TestCache(t *testing.T) {
 
 		_, ok = c.Get("bbb")
 		require.False(t, ok)
+
+		c = NewCache(0)
+		wasInCache := c.Set("aaa", 100)
+		require.False(t, wasInCache)
+
+		val, exist := c.Get("aaa")
+		require.Nil(t, val)
+		require.False(t, exist)
+
+		c = NewCache(-2)
+		wasInCache = c.Set("aaa", 100)
+		require.False(t, wasInCache)
+
+		val, exist = c.Get("aaa")
+		require.Nil(t, val)
+		require.False(t, exist)
 	})
 
 	t.Run("simple", func(t *testing.T) {

@@ -33,6 +33,10 @@ func (l *lruCache) findItem(key Key) (*ListItem, bool) {
 }
 
 func (l *lruCache) Set(key Key, value interface{}) bool {
+	if l.capacity <= 0 {
+		return false
+	}
+
 	cache := cacheItem{key, value}
 
 	item, exists := l.findItem(key)

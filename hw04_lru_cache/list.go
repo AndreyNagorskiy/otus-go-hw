@@ -51,13 +51,11 @@ func (l *list) PushFront(v interface{}) *ListItem {
 
 	if l.head != nil {
 		l.head.Prev = listItem
+	} else {
+		l.tail = listItem
 	}
 
 	l.head = listItem
-
-	if l.tail == nil {
-		l.tail = l.head
-	}
 	l.len++
 
 	return l.head
@@ -68,14 +66,11 @@ func (l *list) PushBack(v interface{}) *ListItem {
 
 	if l.tail != nil {
 		l.tail.Next = listItem
-	}
-
-	l.tail = listItem
-
-	if l.head == nil {
+	} else {
 		l.head = listItem
 	}
 
+	l.tail = listItem
 	l.len++
 
 	return l.head
