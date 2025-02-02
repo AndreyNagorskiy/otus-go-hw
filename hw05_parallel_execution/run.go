@@ -28,31 +28,7 @@ func Run(tasks []Task, n, m int) error {
 
 	for i := 0; i < n; i++ {
 		wg.Add(1)
-		go func() {
-			defer wg.Done()
-
-			for {
-				select {
-				case <-doneCh:
-					return
-				case task, ok := <-tCh:
-					if !ok {
-						return
-					}
-
-					if err := task(); err != nil {
-						select {
-						case errCh <- struct{}{}:
-							if len(errCh) >= m {
-								closeOnce.Do(func() { close(doneCh) })
-							}
-						case <-doneCh:
-							return
-						}
-					}
-				}
-			}
-		}()
+		go worker(doneCh, tCh, errCh, &wg, m, &closeOnce)
 	}
 
 	go func() {
@@ -73,4 +49,37 @@ func Run(tasks []Task, n, m int) error {
 	}
 
 	return nil
+}
+
+func worker(
+	doneCh chan struct{},
+	tCh <-chan Task,
+	errCh chan<- struct{},
+	wg *sync.WaitGroup,
+	m int,
+	closeOnce *sync.Once,
+) {
+	defer wg.Done()
+
+	for {
+		select {
+		case <-doneCh:
+			return
+		case task, ok := <-tCh:
+			if !ok {
+				return
+			}
+
+			if err := task(); err != nil {
+				select {
+				case errCh <- struct{}{}:
+					if len(errCh) >= m {
+						closeOnce.Do(func() { close(doneCh) })
+					}
+				case <-doneCh:
+					return
+				}
+			}
+		}
+	}
 }
