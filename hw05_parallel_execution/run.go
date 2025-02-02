@@ -2,6 +2,7 @@ package hw05parallelexecution
 
 import (
 	"errors"
+	"sync"
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
@@ -10,6 +11,66 @@ type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
-	// Place your code here.
+	if n <= 0 {
+		return errors.New("number of goroutines must be greater than zero")
+	}
+
+	if m <= 0 || len(tasks) == 0 {
+		return nil
+	}
+
+	doneCh := make(chan struct{})
+	tCh := make(chan Task, n)
+	errCh := make(chan struct{}, m)
+
+	var wg sync.WaitGroup
+	var closeOnce sync.Once
+
+	for i := 0; i < n; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+
+			for {
+				select {
+				case <-doneCh:
+					return
+				case task, ok := <-tCh:
+					if !ok {
+						return
+					}
+
+					if err := task(); err != nil {
+						select {
+						case errCh <- struct{}{}:
+							if len(errCh) >= m {
+								closeOnce.Do(func() { close(doneCh) })
+							}
+						case <-doneCh:
+							return
+						}
+					}
+				}
+			}
+		}()
+	}
+
+	go func() {
+		defer close(tCh)
+		for _, task := range tasks {
+			select {
+			case <-doneCh:
+				return
+			case tCh <- task:
+			}
+		}
+	}()
+
+	wg.Wait()
+
+	if len(errCh) >= m {
+		return ErrErrorsLimitExceeded
+	}
+
 	return nil
 }
