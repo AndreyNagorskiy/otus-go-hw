@@ -5,17 +5,21 @@ import (
 	"sync"
 )
 
-var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+var (
+	ErrErrorsLimitExceeded          = errors.New("errors limit exceeded")
+	ErrWorkersMustBeGreaterThanZero = errors.New("workers must be greater than zero")
+)
 
 type Task func() error
 
 // Run starts tasks in n goroutines and stops its work when receiving m errors from tasks.
 func Run(tasks []Task, n, m int) error {
-	if n <= 0 {
-		return errors.New("number of goroutines must be greater than zero")
-	}
-
-	if m <= 0 || len(tasks) == 0 {
+	switch {
+	case n <= 0:
+		return ErrWorkersMustBeGreaterThanZero
+	case m <= 0:
+		return ErrErrorsLimitExceeded
+	case len(tasks) == 0:
 		return nil
 	}
 
