@@ -22,7 +22,10 @@ func handleStage(done In, stage Stage, in In) Out {
 	outCh := make(Bi)
 
 	go func() {
-		defer close(outCh)
+		defer func() {
+			close(outCh)
+			<-in // for TestAllStageStop
+		}()
 
 		for {
 			select {
