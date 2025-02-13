@@ -15,7 +15,28 @@ func ExecutePipeline(in In, done In, stages ...Stage) Out {
 		out = handleStage(done, stage, out)
 	}
 
-	return out
+	// Промежуточный канал для отслеживания сигнала done
+	resultCh := make(Bi)
+	go func() {
+		defer close(resultCh)
+		for {
+			select {
+			case <-done:
+				return
+			case v, ok := <-out:
+				if !ok {
+					return
+				}
+				select {
+				case <-done:
+					return
+				case resultCh <- v:
+				}
+			}
+		}
+	}()
+
+	return resultCh
 }
 
 func handleStage(done In, stage Stage, in In) Out {
