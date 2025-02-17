@@ -14,6 +14,7 @@ import (
 var (
 	ErrUnsupportedFile       = errors.New("unsupported file")
 	ErrOffsetExceedsFileSize = errors.New("offset exceeds file size")
+	ErrFromPathEqualToPath   = errors.New("from path equal to path")
 )
 
 func isSystemFile(fromPath string, fileInfo os.FileInfo) error {
@@ -44,6 +45,10 @@ func isSystemFile(fromPath string, fileInfo os.FileInfo) error {
 }
 
 func Copy(fromPath, toPath string, offset, limit int64) error {
+	if fromPath == toPath {
+		return ErrFromPathEqualToPath
+	}
+
 	file, err := os.Open(fromPath)
 	if err != nil {
 		return fmt.Errorf("error opening file: %w", err)

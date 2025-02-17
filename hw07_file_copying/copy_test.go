@@ -44,6 +44,11 @@ func TestCopySystemFiles(t *testing.T) {
 }
 
 func TestCopy(t *testing.T) {
+	t.Run("from path equal to path", func(t *testing.T) {
+		err := Copy("testdata/input.txt", "testdata/input.txt", 0, 0)
+		require.ErrorIs(t, err, ErrFromPathEqualToPath)
+	})
+
 	t.Run("offset exceeds file size", func(t *testing.T) {
 		err := Copy("testdata/input.txt", "out.txt", 1000000, 0)
 		require.ErrorIs(t, err, ErrOffsetExceedsFileSize)
