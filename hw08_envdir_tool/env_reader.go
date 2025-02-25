@@ -76,7 +76,7 @@ func makeEnvValue(dir string, entry fs.DirEntry) (*EnvValue, error) {
 		return nil, fmt.Errorf("failed to read file %s: %w", filePath, err)
 	}
 
-	//если файл полностью пустой (длина - 0 байт), то envdir удаляет переменную окружения с именем S.
+	// Если файл полностью пустой (длина - 0 байт), то envdir удаляет переменную окружения с именем S.
 	if len(content) == 0 {
 		return &EnvValue{Value: "", NeedRemove: true}, nil
 	}
@@ -84,7 +84,7 @@ func makeEnvValue(dir string, entry fs.DirEntry) (*EnvValue, error) {
 	return &EnvValue{Value: trimContent(content), NeedRemove: false}, nil
 }
 
-// Пробелы и табуляция в конце T удаляются; терминальные нули (0x00) заменяются на перевод строки (\n);
+// Пробелы и табуляция в конце T удаляются; терминальные нули (0x00) заменяются на перевод строки (\n).
 func trimContent(content []byte) string {
 	trimmedContent := bytes.TrimRight(content, " \t")
 

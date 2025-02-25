@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestReadDir(t *testing.T) {
@@ -29,7 +30,6 @@ func TestReadDir(t *testing.T) {
 		env, err := ReadDir("testdata/env")
 		require.NoError(t, err)
 
-		// Ожидаемые значения в формате: ключ -> {значение, флаг NeedRemove}
 		expected := map[string]struct {
 			value      string
 			needRemove bool

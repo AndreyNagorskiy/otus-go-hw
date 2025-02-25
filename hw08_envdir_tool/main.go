@@ -18,6 +18,4 @@ func main() {
 	}
 
 	RunCmd(args[2:], env)
-
-	fmt.Printf("%+v\n", env)
 }
