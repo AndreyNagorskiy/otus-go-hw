@@ -31,12 +31,18 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 		}
 	}
 
-	command := exec.Command(cmd[0], cmd[1:]...)
+	path, err := exec.LookPath(cmd[0])
+	if err != nil {
+		fmt.Printf("Ошибка: команда %q не найдена\n", cmd[0])
+		return ErrorCode
+	}
+
+	command := exec.Command(path, cmd[1:]...)
 
 	command.Stdout = os.Stdout
 	command.Stderr = os.Stderr
 
-	err := command.Run()
+	err = command.Run()
 	if err != nil {
 		fmt.Printf("Command execution error %s: %v\n", cmd[0], err)
 		return ErrorCode
