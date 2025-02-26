@@ -18,5 +18,5 @@ func main() {
 	}
 
 	code := RunCmd(args[2:], env)
-	fmt.Println("Exit Code:", code)
+	os.Exit(code)
 }
