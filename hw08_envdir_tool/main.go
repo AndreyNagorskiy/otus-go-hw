@@ -17,5 +17,6 @@ func main() {
 		fmt.Println(err)
 	}
 
-	RunCmd(args[2:], env)
+	code := RunCmd(args[2:], env)
+	fmt.Println("Exit Code:", code)
 }

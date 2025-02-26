@@ -26,7 +26,7 @@ func TestRunCmd(t *testing.T) {
 		cmd := []string{"ls", "-la", "sdgsgsdfdsfs"}
 		code := RunCmd(cmd, testEnv)
 
-		require.Equal(t, code, ErrorCode)
+		require.Equal(t, code, FileNotFoundCOde)
 	})
 
 	t.Run("success", func(t *testing.T) {
