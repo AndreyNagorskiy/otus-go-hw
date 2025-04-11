@@ -33,8 +33,7 @@ func main() {
 	cfg := MustLoad(configFile)
 	l := logger.NewLogger(cfg.LogLevel)
 
-	ctx, cancel := signal.NotifyContext(context.Background(),
-		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
 	var storage app.Storage
@@ -57,22 +56,24 @@ func main() {
 	}
 
 	calendar := app.New(l, storage)
-	server := internalhttp.NewServer(l, calendar)
+	server := internalhttp.NewServer(l, calendar, cfg.Server.Host, cfg.Server.Port)
 
 	go func() {
-		<-ctx.Done()
-
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-		defer cancel()
-
-		if err := server.Stop(ctx); err != nil {
-			l.Error("failed to stop http server: " + err.Error())
+		if err := server.Start(); err != nil {
+			l.Error("Server failed", slog.String("error", err.Error()))
+			cancel()
 		}
 	}()
 
-	if err := server.Start(ctx); err != nil {
-		l.Error("failed to start http server: " + err.Error())
-		cancel()
-		os.Exit(1) //nolint:gocritic
+	<-ctx.Done()
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+
+	if err := server.Stop(shutdownCtx); err != nil {
+		l.Error("Shutdown failed", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
+
+	l.Info("Application stopped")
 }

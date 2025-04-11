@@ -18,6 +18,7 @@ type Config struct {
 	LogLevel    string   `yaml:"log_level" env:"LOG_LEVEL" env-default:"info"`
 	StorageType string   `yaml:"storage_type" env:"STORAGE_TYPE" env-default:"memory"`
 	DB          Database `yaml:"db"`
+	Server      Server   `yaml:"server"`
 }
 
 type Database struct {
@@ -26,6 +27,11 @@ type Database struct {
 	Name     string `yaml:"name" env:"DB_NAME" env-default:"postgres"`
 	Username string `yaml:"username" env:"DB_USERNAME" env-default:"postgres"`
 	Password string `yaml:"password" env:"DB_PASSWORD" env-default:""`
+}
+
+type Server struct {
+	Host string `yaml:"host" env:"SERVER_HOST" env-default:"localhost"`
+	Port int    `yaml:"port" env:"SERVER_PORT" env-default:"8080"`
 }
 
 func MustLoad(cfgFilePath string) Config {
