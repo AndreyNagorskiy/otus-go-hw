@@ -40,7 +40,7 @@ func main() {
 
 	switch cfg.StorageType {
 	case MemoryStorageType:
-		storage = memorystorage.New()
+		storage = memorystorage.NewStorage()
 	case SQLStorageType:
 		dbConnectionString := cfg.MakeDbConnectionString()
 		sqlstorage.Migrate(dbConnectionString, false)

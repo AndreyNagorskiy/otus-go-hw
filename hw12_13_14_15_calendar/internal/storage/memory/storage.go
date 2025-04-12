@@ -2,7 +2,6 @@ package memorystorage
 
 import (
 	"context"
-	"fmt"
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 	"sync"
 )
@@ -12,7 +11,7 @@ type Storage struct {
 	events map[string]storage.Event
 }
 
-func New() *Storage {
+func NewStorage() *Storage {
 	return &Storage{
 		events: make(map[string]storage.Event),
 	}
@@ -27,7 +26,7 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
 		defer s.mu.Unlock()
 
 		if _, exists := s.events[event.ID]; exists {
-			return fmt.Errorf("event already exists")
+			return storage.ErrEventAlreadyExists
 		}
 		s.events[event.ID] = event
 		return nil
@@ -44,7 +43,7 @@ func (s *Storage) GetEvent(ctx context.Context, id string) (storage.Event, error
 
 		event, exists := s.events[id]
 		if !exists {
-			return storage.Event{}, fmt.Errorf("event not found")
+			return storage.Event{}, storage.ErrEventNotFound
 		}
 		return event, nil
 	}
@@ -59,7 +58,7 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) error {
 		defer s.mu.Unlock()
 
 		if _, exists := s.events[event.ID]; !exists {
-			return fmt.Errorf("event not found")
+			return storage.ErrEventNotFound
 		}
 		s.events[event.ID] = event
 		return nil
@@ -75,7 +74,7 @@ func (s *Storage) DeleteEvent(ctx context.Context, id string) error {
 		defer s.mu.Unlock()
 
 		if _, exists := s.events[id]; !exists {
-			return fmt.Errorf("event not found")
+			return storage.ErrEventNotFound
 		}
 		delete(s.events, id)
 		return nil
