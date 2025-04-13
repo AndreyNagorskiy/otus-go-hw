@@ -1,0 +1,11 @@
+log_level: debug
+storage_type: sql
+db:
+  host: localhost
+  port: 5432
+  name: calendar
+  username: calendar
+  password: calendar
+server:
+  host: localhost
+  port: 8081
