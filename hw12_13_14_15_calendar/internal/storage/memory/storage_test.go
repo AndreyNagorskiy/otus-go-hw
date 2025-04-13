@@ -3,10 +3,11 @@ package memorystorage
 import (
 	"context"
 	"errors"
-	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 )
 
 func TestStorage_CreateEvent(t *testing.T) {

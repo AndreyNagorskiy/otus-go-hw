@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 )
@@ -26,10 +27,6 @@ func New(logger logger.Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
-	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
+func (a *App) CreateEvent(ctx context.Context, event storage.Event) error {
+	return a.storage.CreateEvent(ctx, event)
 }
-
-// TODO

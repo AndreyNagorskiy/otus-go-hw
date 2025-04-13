@@ -3,6 +3,7 @@ package sqlstorage
 import (
 	"context"
 	"fmt"
+
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -21,7 +22,8 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
 		VALUES ($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (id) DO NOTHING`
 
-	_, err := s.db.Exec(ctx, query, event.Title, event.StartTime, event.EndTime, event.Description, event.OwnerID, event.NotifyBefore)
+	_, err := s.db.Exec(ctx, query, event.Title, event.StartTime, event.EndTime, event.Description, event.OwnerID,
+		event.NotifyBefore)
 	if err != nil {
 		return fmt.Errorf("failed to create event: %w", err)
 	}
@@ -36,7 +38,8 @@ func (s *Storage) GetEvent(ctx context.Context, id string) (storage.Event, error
 
 	var event storage.Event
 
-	err := s.db.QueryRow(ctx, query, id).Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime, &event.Description, &event.OwnerID, &event.NotifyBefore)
+	err := s.db.QueryRow(ctx, query, id).Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime,
+		&event.Description, &event.OwnerID, &event.NotifyBefore)
 	if err != nil {
 		return storage.Event{}, fmt.Errorf("failed to get event: %w", err)
 	}
@@ -55,7 +58,8 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) error {
 		notify_before = $7
 		WHERE id = $1`
 
-	result, err := s.db.Exec(ctx, query, event.ID, event.Title, event.StartTime, event.EndTime, event.Description, event.OwnerID, event.NotifyBefore)
+	result, err := s.db.Exec(ctx, query, event.ID, event.Title, event.StartTime, event.EndTime, event.Description,
+		event.OwnerID, event.NotifyBefore)
 	if err != nil {
 		return fmt.Errorf("failed to update event: %w", err)
 	}
@@ -98,7 +102,8 @@ func (s *Storage) GetAllEvents(ctx context.Context) ([]storage.Event, error) {
 	var events []storage.Event
 	for rows.Next() {
 		var event storage.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime, &event.Description, &event.OwnerID, &event.NotifyBefore); err != nil {
+		if err := rows.Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime, &event.Description,
+			&event.OwnerID, &event.NotifyBefore); err != nil {
 			return nil, fmt.Errorf("failed to scan event: %w", err)
 		}
 		events = append(events, event)

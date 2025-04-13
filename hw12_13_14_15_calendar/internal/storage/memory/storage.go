@@ -2,8 +2,9 @@ package memorystorage
 
 import (
 	"context"
-	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 	"sync"
+
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Storage struct {

@@ -3,17 +3,17 @@ package main
 import (
 	"context"
 	"flag"
+	"log/slog"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/app"
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage/sql"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"log/slog"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 var configFile string
@@ -42,8 +42,12 @@ func main() {
 	case MemoryStorageType:
 		storage = memorystorage.NewStorage()
 	case SQLStorageType:
-		dbConnectionString := cfg.MakeDbConnectionString()
-		sqlstorage.Migrate(dbConnectionString, false)
+		dbConnectionString := cfg.MakeDBConnectionString()
+		err := sqlstorage.Migrate(dbConnectionString, false)
+		if err != nil {
+			l.Error("Unable to migrate database", slog.String("error", err.Error()))
+			return
+		}
 		dbPool, err := pgxpool.New(ctx, dbConnectionString)
 		if err != nil {
 			l.Error("Unable to connect to database", slog.String("error", err.Error()))
@@ -72,7 +76,7 @@ func main() {
 
 	if err := server.Stop(shutdownCtx); err != nil {
 		l.Error("Shutdown failed", slog.String("error", err.Error()))
-		os.Exit(1)
+		panic("server shutdown failed")
 	}
 
 	l.Info("Application stopped")

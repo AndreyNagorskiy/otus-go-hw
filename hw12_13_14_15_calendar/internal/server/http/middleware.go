@@ -61,7 +61,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 }
 
 func writeLogToFile(logLine string) {
-	file, err := os.OpenFile("logs/requests.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile("logs/requests.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to open log file: %v", err))
 	}

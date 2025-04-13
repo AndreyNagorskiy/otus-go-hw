@@ -4,11 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
 	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
+
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
 )
 
 type Server struct {
@@ -55,7 +56,7 @@ func (s *Server) Stop(ctx context.Context) error {
 	return nil
 }
 
-func hello(w http.ResponseWriter, r *http.Request) {
+func hello(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusForbidden)
 	w.Write([]byte("Hello, world!"))
 }

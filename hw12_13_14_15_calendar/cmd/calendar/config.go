@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/ilyakaznacheev/cleanenv"
 	"log"
+
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 // При желании конфигурацию можно вынести в internal/config.
@@ -15,8 +16,8 @@ const (
 )
 
 type Config struct {
-	LogLevel    string   `yaml:"log_level" env:"LOG_LEVEL" env-default:"info"`
-	StorageType string   `yaml:"storage_type" env:"STORAGE_TYPE" env-default:"memory"`
+	LogLevel    string   `yaml:"logLevel" env:"LOG_LEVEL" env-default:"info"`
+	StorageType string   `yaml:"storageType" env:"STORAGE_TYPE" env-default:"memory"`
 	DB          Database `yaml:"db"`
 	Server      Server   `yaml:"server"`
 }
@@ -56,7 +57,7 @@ func validateStorageType(storageType string) {
 	}
 }
 
-func (c *Config) MakeDbConnectionString() string {
+func (c *Config) MakeDBConnectionString() string {
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s",
 		c.DB.Username,
 		c.DB.Password,
