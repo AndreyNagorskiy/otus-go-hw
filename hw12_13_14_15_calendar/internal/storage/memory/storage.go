@@ -5,6 +5,7 @@ import (
 	"sync"
 
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
+	"github.com/google/uuid"
 )
 
 type Storage struct {
@@ -18,7 +19,7 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
+func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdateEventParams) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -26,9 +27,22 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
 		s.mu.Lock()
 		defer s.mu.Unlock()
 
-		if _, exists := s.events[event.ID]; exists {
+		id := uuid.New().String()
+
+		if _, exists := s.events[id]; exists {
 			return storage.ErrEventAlreadyExists
 		}
+
+		event := storage.Event{
+			ID:           id,
+			Title:        params.Title,
+			StartTime:    params.StartTime,
+			EndTime:      params.EndTime,
+			Description:  params.Description,
+			OwnerID:      params.OwnerID,
+			NotifyBefore: params.NotifyBefore,
+		}
+
 		s.events[event.ID] = event
 		return nil
 	}

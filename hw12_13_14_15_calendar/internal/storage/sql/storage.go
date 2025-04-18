@@ -16,14 +16,14 @@ func New(db *pgxpool.Pool) *Storage {
 	return &Storage{db: db}
 }
 
-func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
+func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdateEventParams) error {
 	query := `
 		INSERT INTO events (title, start_time, end_time, description, owner_id, notify_before)
 		VALUES ($1, $2, $3, $4, $5, $6)
 		ON CONFLICT (id) DO NOTHING`
 
-	_, err := s.db.Exec(ctx, query, event.Title, event.StartTime, event.EndTime, event.Description, event.OwnerID,
-		event.NotifyBefore)
+	_, err := s.db.Exec(ctx, query, params.Title, params.StartTime, params.EndTime, params.Description, params.OwnerID,
+		params.NotifyBefore)
 	if err != nil {
 		return fmt.Errorf("failed to create event: %w", err)
 	}
@@ -65,7 +65,7 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) error {
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("event not found")
+		return storage.ErrEventNotFound
 	}
 
 	return nil
@@ -82,7 +82,7 @@ func (s *Storage) DeleteEvent(ctx context.Context, id string) error {
 	}
 
 	if result.RowsAffected() == 0 {
-		return fmt.Errorf("event not found")
+		return storage.ErrEventNotFound
 	}
 
 	return nil

@@ -3,6 +3,7 @@ package memorystorage
 import (
 	"context"
 	"errors"
+	"fmt"
 	"sync"
 	"testing"
 	"time"
@@ -10,24 +11,33 @@ import (
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 )
 
+func makeCreateOrUpdateEventParams() storage.CreateOrUpdateEventParams {
+	description := "Test Description"
+	notifyBefore := time.Duration(10) * time.Minute
+
+	return storage.CreateOrUpdateEventParams{
+		Title:        "Test Event",
+		StartTime:    time.Now(),
+		EndTime:      time.Now().Add(1 * time.Hour),
+		Description:  &description,
+		OwnerID:      "123e4567-e89b-12d3-a456-426614174000",
+		NotifyBefore: &notifyBefore,
+	}
+}
+
 func TestStorage_CreateEvent(t *testing.T) {
 	s := NewStorage()
 	ctx := context.Background()
-	event := storage.Event{ID: "1", Title: "Test Event"}
 
-	err := s.CreateEvent(ctx, event)
+	params := makeCreateOrUpdateEventParams()
+	err := s.CreateEvent(ctx, params)
 	if err != nil {
 		t.Errorf("CreateEvent() error = %v, want nil", err)
 	}
 
-	err = s.CreateEvent(ctx, event)
-	if !errors.Is(err, storage.ErrEventAlreadyExists) {
-		t.Errorf("CreateEvent() error = %v, want %v", err, storage.ErrEventAlreadyExists)
-	}
-
 	cancelCtx, cancel := context.WithCancel(ctx)
 	cancel()
-	err = s.CreateEvent(cancelCtx, event)
+	err = s.CreateEvent(cancelCtx, params)
 	if !errors.Is(err, context.Canceled) {
 		t.Errorf("CreateEvent() with canceled context error = %v, want %v", err, context.Canceled)
 	}
@@ -36,25 +46,44 @@ func TestStorage_CreateEvent(t *testing.T) {
 func TestStorage_GetEvent(t *testing.T) {
 	s := NewStorage()
 	ctx := context.Background()
-	event := storage.Event{ID: "1", Title: "Test Event"}
 
-	_, err := s.GetEvent(ctx, "1")
+	_, err := s.GetEvent(ctx, "nonexistent-id")
 	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Errorf("GetEvent() error = %v, want %v", err, storage.ErrEventNotFound)
 	}
 
-	_ = s.CreateEvent(ctx, event)
-	gotEvent, err := s.GetEvent(ctx, "1")
+	params := makeCreateOrUpdateEventParams()
+	err = s.CreateEvent(ctx, params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	allEvents, err := s.GetAllEvents(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(allEvents) != 1 {
+		t.Fatalf("Expected 1 event, got %d", len(allEvents))
+	}
+	eventID := allEvents[0].ID
+
+	gotEvent, err := s.GetEvent(ctx, eventID)
 	if err != nil {
 		t.Errorf("GetEvent() error = %v, want nil", err)
 	}
-	if gotEvent.ID != event.ID || gotEvent.Title != event.Title {
-		t.Errorf("GetEvent() = %v, want %v", gotEvent, event)
+	if gotEvent.Title != params.Title {
+		t.Errorf("GetEvent() = %v, want title %v", gotEvent, params.Title)
+	}
+	if gotEvent.StartTime != params.StartTime {
+		t.Errorf("GetEvent() = %v, want start time %v", gotEvent.StartTime, params.StartTime)
+	}
+	if gotEvent.EndTime != params.EndTime {
+		t.Errorf("GetEvent() = %v, want end time %v", gotEvent.EndTime, params.EndTime)
 	}
 
 	cancelCtx, cancel := context.WithCancel(ctx)
 	cancel()
-	_, err = s.GetEvent(cancelCtx, "1")
+	_, err = s.GetEvent(cancelCtx, eventID)
 	if !errors.Is(err, context.Canceled) {
 		t.Errorf("GetEvent() with canceled context error = %v, want %v", err, context.Canceled)
 	}
@@ -63,20 +92,40 @@ func TestStorage_GetEvent(t *testing.T) {
 func TestStorage_UpdateEvent(t *testing.T) {
 	s := NewStorage()
 	ctx := context.Background()
-	event := storage.Event{ID: "1", Title: "Test Event"}
-	updatedEvent := storage.Event{ID: "1", Title: "Updated Event"}
 
-	err := s.UpdateEvent(ctx, updatedEvent)
+	params := makeCreateOrUpdateEventParams()
+	err := s.CreateEvent(ctx, params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	allEvents, err := s.GetAllEvents(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	eventID := allEvents[0].ID
+
+	err = s.UpdateEvent(ctx, storage.Event{ID: "nonexistent-id", Title: "Updated"})
 	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Errorf("UpdateEvent() error = %v, want %v", err, storage.ErrEventNotFound)
 	}
 
-	_ = s.CreateEvent(ctx, event)
+	updatedEvent := storage.Event{
+		ID:        eventID,
+		Title:     "Updated Event",
+		StartTime: allEvents[0].StartTime,
+		EndTime:   allEvents[0].EndTime,
+		OwnerID:   allEvents[0].OwnerID,
+	}
 	err = s.UpdateEvent(ctx, updatedEvent)
 	if err != nil {
 		t.Errorf("UpdateEvent() error = %v, want nil", err)
 	}
-	gotEvent, _ := s.GetEvent(ctx, "1")
+
+	gotEvent, err := s.GetEvent(ctx, eventID)
+	if err != nil {
+		t.Fatal(err)
+	}
 	if gotEvent.Title != updatedEvent.Title {
 		t.Errorf("After UpdateEvent() title = %v, want %v", gotEvent.Title, updatedEvent.Title)
 	}
@@ -92,26 +141,37 @@ func TestStorage_UpdateEvent(t *testing.T) {
 func TestStorage_DeleteEvent(t *testing.T) {
 	s := NewStorage()
 	ctx := context.Background()
-	event := storage.Event{ID: "1", Title: "Test Event"}
 
-	err := s.DeleteEvent(ctx, "1")
+	err := s.DeleteEvent(ctx, "nonexistent-id")
 	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Errorf("DeleteEvent() error = %v, want %v", err, storage.ErrEventNotFound)
 	}
 
-	_ = s.CreateEvent(ctx, event)
-	err = s.DeleteEvent(ctx, "1")
+	params := makeCreateOrUpdateEventParams()
+	err = s.CreateEvent(ctx, params)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	allEvents, err := s.GetAllEvents(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	eventID := allEvents[0].ID
+
+	err = s.DeleteEvent(ctx, eventID)
 	if err != nil {
 		t.Errorf("DeleteEvent() error = %v, want nil", err)
 	}
-	_, err = s.GetEvent(ctx, "1")
+
+	_, err = s.GetEvent(ctx, eventID)
 	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Errorf("After DeleteEvent() error = %v, want %v", err, storage.ErrEventNotFound)
 	}
 
 	cancelCtx, cancel := context.WithCancel(ctx)
 	cancel()
-	err = s.DeleteEvent(cancelCtx, "1")
+	err = s.DeleteEvent(cancelCtx, eventID)
 	if !errors.Is(err, context.Canceled) {
 		t.Errorf("DeleteEvent() with canceled context error = %v, want %v", err, context.Canceled)
 	}
@@ -120,10 +180,6 @@ func TestStorage_DeleteEvent(t *testing.T) {
 func TestStorage_GetAllEvents(t *testing.T) {
 	s := NewStorage()
 	ctx := context.Background()
-	events := []storage.Event{
-		{ID: "1", Title: "Event 1"},
-		{ID: "2", Title: "Event 2"},
-	}
 
 	allEvents, err := s.GetAllEvents(ctx)
 	if err != nil {
@@ -133,15 +189,29 @@ func TestStorage_GetAllEvents(t *testing.T) {
 		t.Errorf("GetAllEvents() length = %v, want 0", len(allEvents))
 	}
 
-	for _, e := range events {
-		_ = s.CreateEvent(ctx, e)
+	testEvents := []storage.CreateOrUpdateEventParams{
+		makeCreateOrUpdateEventParams(),
+		{
+			Title:     "Event 2",
+			StartTime: time.Now().Add(2 * time.Hour),
+			EndTime:   time.Now().Add(3 * time.Hour),
+			OwnerID:   "owner-2",
+		},
 	}
+
+	for _, e := range testEvents {
+		err := s.CreateEvent(ctx, e)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	allEvents, err = s.GetAllEvents(ctx)
 	if err != nil {
 		t.Errorf("GetAllEvents() error = %v, want nil", err)
 	}
-	if len(allEvents) != len(events) {
-		t.Errorf("GetAllEvents() length = %v, want %v", len(allEvents), len(events))
+	if len(allEvents) != len(testEvents) {
+		t.Errorf("GetAllEvents() length = %v, want %v", len(allEvents), len(testEvents))
 	}
 
 	cancelCtx, cancel := context.WithCancel(ctx)
@@ -162,11 +232,61 @@ func TestStorage_ConcurrentAccess(t *testing.T) {
 	for i := 0; i < count; i++ {
 		go func(i int) {
 			defer wg.Done()
-			event := storage.Event{ID: string(rune(i)), Title: "Event"}
-			_ = s.CreateEvent(ctx, event)
-			_, _ = s.GetEvent(ctx, event.ID)
-			_ = s.UpdateEvent(ctx, storage.Event{ID: event.ID, Title: "Updated Event"})
-			_ = s.DeleteEvent(ctx, event.ID)
+			params := storage.CreateOrUpdateEventParams{
+				Title:     fmt.Sprintf("Event %d", i),
+				StartTime: time.Now().Add(time.Duration(i) * time.Minute),
+				EndTime:   time.Now().Add(time.Duration(i+1) * time.Minute),
+				OwnerID:   fmt.Sprintf("owner-%d", i),
+			}
+			err := s.CreateEvent(ctx, params)
+			if err != nil {
+				t.Logf("CreateEvent failed: %v", err)
+				return
+			}
+
+			allEvents, err := s.GetAllEvents(ctx)
+			if err != nil {
+				t.Logf("GetAllEvents failed: %v", err)
+				return
+			}
+
+			var eventID string
+			for _, e := range allEvents {
+				if e.Title == params.Title && e.OwnerID == params.OwnerID {
+					eventID = e.ID
+					break
+				}
+			}
+
+			if eventID == "" {
+				t.Log("Event not found after creation")
+				return
+			}
+
+			_, err = s.GetEvent(ctx, eventID)
+			if err != nil {
+				t.Logf("GetEvent failed: %v", err)
+				return
+			}
+
+			updatedEvent := storage.Event{
+				ID:        eventID,
+				Title:     fmt.Sprintf("Updated Event %d", i),
+				StartTime: params.StartTime,
+				EndTime:   params.EndTime,
+				OwnerID:   params.OwnerID,
+			}
+			err = s.UpdateEvent(ctx, updatedEvent)
+			if err != nil {
+				t.Logf("UpdateEvent failed: %v", err)
+				return
+			}
+
+			err = s.DeleteEvent(ctx, eventID)
+			if err != nil {
+				t.Logf("DeleteEvent failed: %v", err)
+				return
+			}
 		}(i)
 	}
 	wg.Wait()
@@ -188,7 +308,7 @@ func TestStorage_ContextTimeout(t *testing.T) {
 
 	time.Sleep(time.Millisecond)
 
-	event := storage.Event{ID: "1", Title: "Test Event"}
+	params := makeCreateOrUpdateEventParams()
 
 	tests := []struct {
 		name string
@@ -197,22 +317,30 @@ func TestStorage_ContextTimeout(t *testing.T) {
 	}{
 		{
 			name: "CreateEvent",
-			fn:   func() error { return s.CreateEvent(ctx, event) },
+			fn:   func() error { return s.CreateEvent(ctx, params) },
 			want: context.DeadlineExceeded,
 		},
 		{
 			name: "GetEvent",
-			fn:   func() error { _, err := s.GetEvent(ctx, "1"); return err },
+			fn:   func() error { _, err := s.GetEvent(ctx, "nonexistent-id"); return err },
 			want: context.DeadlineExceeded,
 		},
 		{
 			name: "UpdateEvent",
-			fn:   func() error { return s.UpdateEvent(ctx, event) },
+			fn: func() error {
+				return s.UpdateEvent(ctx, storage.Event{
+					ID:        "nonexistent-id",
+					Title:     "Test Event",
+					StartTime: time.Now(),
+					EndTime:   time.Now().Add(time.Hour),
+					OwnerID:   "test-owner",
+				})
+			},
 			want: context.DeadlineExceeded,
 		},
 		{
 			name: "DeleteEvent",
-			fn:   func() error { return s.DeleteEvent(ctx, "1") },
+			fn:   func() error { return s.DeleteEvent(ctx, "nonexistent-id") },
 			want: context.DeadlineExceeded,
 		},
 		{

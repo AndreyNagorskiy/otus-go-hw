@@ -9,21 +9,28 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/app"
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/handlers"
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
 )
 
 type Server struct {
 	logger logger.Logger
-	app    Application
+	app    app.Application
 	server *http.Server
 }
 
-type Application interface { // TODO
-}
-
-func NewServer(logger logger.Logger, app Application, host string, port int) *Server {
+func NewServer(logger logger.Logger, app app.Application, host string, port int) *Server {
 	mux := http.NewServeMux()
+
 	mux.HandleFunc("GET /hello", hello)
+
+	eventH := handlers.NewEventHandler(app)
+
+	mux.HandleFunc("POST /api/events", eventH.Create)
+	mux.HandleFunc("PUT /api/events", eventH.Update)
+	mux.HandleFunc("DELETE /api/events/{id}", eventH.Delete)
+
 	m := loggingMiddleware(mux)
 
 	return &Server{
