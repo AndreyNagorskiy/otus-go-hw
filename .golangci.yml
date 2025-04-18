@@ -22,6 +22,10 @@ linters-settings:
         allow:
           - $gostd
           - github.com/stretchr/testify
+  tagliatelle:
+    case:
+      rules:
+        yaml: snake
 issues:
   exclude-rules:
     - path: _test\.go
