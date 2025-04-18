@@ -30,14 +30,14 @@ func TestStorage_CreateEvent(t *testing.T) {
 	ctx := context.Background()
 
 	params := makeCreateOrUpdateEventParams()
-	err := s.CreateEvent(ctx, params)
+	_, err := s.CreateEvent(ctx, params)
 	if err != nil {
 		t.Errorf("CreateEvent() error = %v, want nil", err)
 	}
 
 	cancelCtx, cancel := context.WithCancel(ctx)
 	cancel()
-	err = s.CreateEvent(cancelCtx, params)
+	_, err = s.CreateEvent(cancelCtx, params)
 	if !errors.Is(err, context.Canceled) {
 		t.Errorf("CreateEvent() with canceled context error = %v, want %v", err, context.Canceled)
 	}
@@ -53,7 +53,7 @@ func TestStorage_GetEvent(t *testing.T) {
 	}
 
 	params := makeCreateOrUpdateEventParams()
-	err = s.CreateEvent(ctx, params)
+	_, err = s.CreateEvent(ctx, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,7 +94,7 @@ func TestStorage_UpdateEvent(t *testing.T) {
 	ctx := context.Background()
 
 	params := makeCreateOrUpdateEventParams()
-	err := s.CreateEvent(ctx, params)
+	_, err := s.CreateEvent(ctx, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -148,7 +148,7 @@ func TestStorage_DeleteEvent(t *testing.T) {
 	}
 
 	params := makeCreateOrUpdateEventParams()
-	err = s.CreateEvent(ctx, params)
+	_, err = s.CreateEvent(ctx, params)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,7 +200,7 @@ func TestStorage_GetAllEvents(t *testing.T) {
 	}
 
 	for _, e := range testEvents {
-		err := s.CreateEvent(ctx, e)
+		_, err := s.CreateEvent(ctx, e)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -238,7 +238,7 @@ func TestStorage_ConcurrentAccess(t *testing.T) {
 				EndTime:   time.Now().Add(time.Duration(i+1) * time.Minute),
 				OwnerID:   fmt.Sprintf("owner-%d", i),
 			}
-			err := s.CreateEvent(ctx, params)
+			_, err := s.CreateEvent(ctx, params)
 			if err != nil {
 				t.Logf("CreateEvent failed: %v", err)
 				return
@@ -317,7 +317,7 @@ func TestStorage_ContextTimeout(t *testing.T) {
 	}{
 		{
 			name: "CreateEvent",
-			fn:   func() error { return s.CreateEvent(ctx, params) },
+			fn:   func() error { _, err := s.CreateEvent(ctx, params); return err },
 			want: context.DeadlineExceeded,
 		},
 		{
