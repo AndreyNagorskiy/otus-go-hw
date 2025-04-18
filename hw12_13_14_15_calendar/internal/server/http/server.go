@@ -30,6 +30,7 @@ func NewServer(logger logger.Logger, app app.Application, host string, port int)
 	mux.HandleFunc("POST /api/events", eventH.Create)
 	mux.HandleFunc("PUT /api/events", eventH.Update)
 	mux.HandleFunc("DELETE /api/events/{id}", eventH.Delete)
+	mux.HandleFunc("GET /api/events/{id}", eventH.Get)
 
 	m := loggingMiddleware(mux)
 

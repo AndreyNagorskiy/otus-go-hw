@@ -19,10 +19,10 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdateEventParams) error {
+func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdateEventParams) (*storage.Event, error) {
 	select {
 	case <-ctx.Done():
-		return ctx.Err()
+		return nil, ctx.Err()
 	default:
 		s.mu.Lock()
 		defer s.mu.Unlock()
@@ -30,7 +30,7 @@ func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdate
 		id := uuid.New().String()
 
 		if _, exists := s.events[id]; exists {
-			return storage.ErrEventAlreadyExists
+			return nil, storage.ErrEventAlreadyExists
 		}
 
 		event := storage.Event{
@@ -44,7 +44,7 @@ func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdate
 		}
 
 		s.events[event.ID] = event
-		return nil
+		return &event, nil
 	}
 }
 

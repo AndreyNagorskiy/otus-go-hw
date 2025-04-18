@@ -87,7 +87,7 @@ func (e *EventHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = e.app.CreateEvent(r.Context(), *params)
+	_, err = e.app.CreateEvent(r.Context(), *params)
 	if err != nil {
 		if errors.Is(err, storage.ErrEventAlreadyExists) {
 			RespondWithJSON(w, http.StatusBadRequest, "Event already exists")

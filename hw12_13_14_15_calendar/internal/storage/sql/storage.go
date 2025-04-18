@@ -16,7 +16,7 @@ func New(db *pgxpool.Pool) *Storage {
 	return &Storage{db: db}
 }
 
-func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdateEventParams) error {
+func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdateEventParams) (*storage.Event, error) {
 	query := `
 		INSERT INTO events (title, start_time, end_time, description, owner_id, notify_before)
 		VALUES ($1, $2, $3, $4, $5, $6)
@@ -25,9 +25,9 @@ func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdate
 	_, err := s.db.Exec(ctx, query, params.Title, params.StartTime, params.EndTime, params.Description, params.OwnerID,
 		params.NotifyBefore)
 	if err != nil {
-		return fmt.Errorf("failed to create event: %w", err)
+		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
-	return nil
+	return nil, nil
 }
 
 func (s *Storage) GetEvent(ctx context.Context, id string) (storage.Event, error) {

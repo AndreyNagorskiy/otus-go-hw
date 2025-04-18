@@ -13,7 +13,7 @@ type App struct {
 }
 
 type Storage interface {
-	CreateEvent(ctx context.Context, params storage.CreateOrUpdateEventParams) error
+	CreateEvent(ctx context.Context, params storage.CreateOrUpdateEventParams) (*storage.Event, error)
 	GetEvent(ctx context.Context, id string) (storage.Event, error)
 	UpdateEvent(ctx context.Context, event storage.Event) error
 	DeleteEvent(ctx context.Context, id string) error
@@ -21,7 +21,7 @@ type Storage interface {
 }
 
 type Application interface {
-	CreateEvent(ctx context.Context, param storage.CreateOrUpdateEventParams) error
+	CreateEvent(ctx context.Context, param storage.CreateOrUpdateEventParams) (*storage.Event, error)
 	UpdateEvent(ctx context.Context, event storage.Event) error
 	DeleteEvent(ctx context.Context, id string) error
 	GetEvent(ctx context.Context, id string) (storage.Event, error)
@@ -35,7 +35,7 @@ func New(logger logger.Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, param storage.CreateOrUpdateEventParams) error {
+func (a *App) CreateEvent(ctx context.Context, param storage.CreateOrUpdateEventParams) (*storage.Event, error) {
 	return a.storage.CreateEvent(ctx, param)
 }
 

@@ -16,8 +16,8 @@ const (
 )
 
 type Config struct {
-	LogLevel    string   `yaml:"logLevel" env:"LOG_LEVEL" env-default:"info"`
-	StorageType string   `yaml:"storageType" env:"STORAGE_TYPE" env-default:"memory"`
+	LogLevel    string   `yaml:"log_level" env:"LOG_LEVEL" env-default:"info"`
+	StorageType string   `yaml:"storage_type" env:"STORAGE_TYPE" env-default:"memory"`
 	DB          Database `yaml:"db"`
 	Server      Server   `yaml:"server"`
 }
