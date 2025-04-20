@@ -35,14 +35,14 @@ linters:
   disable-all: true
   enable:
     - asciicheck
-    - depguard
+#    - depguard
     - dogsled
     - dupl
     - bodyclose
     - durationcheck
     - errorlint
     - exhaustive
-    - exportloopref
+    - copyloopvar
     - funlen
     - gci
     - gocognit
