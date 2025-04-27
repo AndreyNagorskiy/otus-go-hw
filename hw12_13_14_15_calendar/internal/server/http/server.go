@@ -6,31 +6,40 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
-	"strconv"
 	"time"
 
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/app"
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/handlers/http"
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
 )
 
 type Server struct {
 	logger logger.Logger
-	app    Application
+	app    app.Application
 	server *http.Server
 }
 
-type Application interface { // TODO
-}
-
-func NewServer(logger logger.Logger, app Application, host string, port int) *Server {
+func NewServer(logger logger.Logger, app app.Application, addr string) *Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /hello", hello)
+
+	eventH := httphandler.NewEventHandler(app)
+
+	mux.HandleFunc("POST /api/events", eventH.Create)
+	mux.HandleFunc("PUT /api/events/{id}", eventH.Update)
+	mux.HandleFunc("DELETE /api/events/{id}", eventH.Delete)
+	mux.HandleFunc("GET /api/events/{id}", eventH.Get)
+	mux.HandleFunc("GET /api/events", eventH.GetAll)
+	mux.HandleFunc("GET /api/events/day", eventH.GetDayEvents)
+	mux.HandleFunc("GET /api/events/week", eventH.GetWeekEvents)
+	mux.HandleFunc("GET /api/events/month", eventH.GetMonthEvents)
+
 	m := loggingMiddleware(mux)
 
 	return &Server{
 		logger: logger,
 		app:    app,
 		server: &http.Server{
-			Addr:         host + ":" + strconv.Itoa(port),
+			Addr:         addr,
 			Handler:      m,
 			ReadTimeout:  10 * time.Second,
 			WriteTimeout: 10 * time.Second,
@@ -40,7 +49,7 @@ func NewServer(logger logger.Logger, app Application, host string, port int) *Se
 }
 
 func (s *Server) Start() error {
-	s.logger.Info("Starting server", slog.String("addr", s.server.Addr))
+	s.logger.Info("Starting http server", slog.String("addr", s.server.Addr))
 	if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("server failed: %w", err)
 	}
@@ -48,15 +57,10 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Stop(ctx context.Context) error {
-	s.logger.Info("Stopping server gracefully...")
+	s.logger.Info("Stopping http server gracefully...")
 	if err := s.server.Shutdown(ctx); err != nil {
 		return fmt.Errorf("shutdown failed: %w", err)
 	}
-	s.logger.Info("Server stopped")
+	s.logger.Info("Http server stopped")
 	return nil
-}
-
-func hello(w http.ResponseWriter, _ *http.Request) {
-	w.WriteHeader(http.StatusForbidden)
-	w.Write([]byte("Hello, world!"))
 }

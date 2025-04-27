@@ -34,6 +34,12 @@ install-lint-deps:
 lint: install-lint-deps
 	golangci-lint run ./...
 
+lint-fix: install-lint-deps
+	golangci-lint run ./... --fix
+
+generate:
+	go generate ./...
+
 migrate-up:
 	goose -dir $(MIGRATIONS_DIR) postgres $(DB_DSN) up
 
@@ -46,4 +52,4 @@ migrate-status:
 migrate-create:
 	goose -dir $(MIGRATIONS_DIR) create $(name) sql
 
-.PHONY: build run build-img run-img version test lint migrate-up migrate-down migrate-status migrate-create
+.PHONY: build run build-img run-img version test lint lint-fix generate migrate-up migrate-down migrate-status migrate-create

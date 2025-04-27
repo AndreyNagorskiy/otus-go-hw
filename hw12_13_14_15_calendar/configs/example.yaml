@@ -6,6 +6,9 @@ db:
   name: calendar
   username: calendar
   password: calendar
-server:
+http_server:
   host: localhost
   port: 8081
+grpc_server:
+  host: localhost
+  port: 8082

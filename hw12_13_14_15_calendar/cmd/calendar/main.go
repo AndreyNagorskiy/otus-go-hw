@@ -9,8 +9,10 @@ import (
 	"time"
 
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/app"
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/handlers/grpc"
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/server/http"
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/server/grpc"
+	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage/sql"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -60,12 +62,21 @@ func main() {
 	}
 
 	calendar := app.New(l, storage)
-	server := internalhttp.NewServer(l, calendar, cfg.Server.Host, cfg.Server.Port)
+	httpServer := internalhttp.NewServer(l, calendar, cfg.MakeHTTPAddr())
 
 	go func() {
-		if err := server.Start(); err != nil {
-			l.Error("Server failed", slog.String("error", err.Error()))
+		if err := httpServer.Start(); err != nil {
+			l.Error("HttpServer failed", slog.String("error", err.Error()))
 			cancel()
+		}
+	}()
+
+	grpcHandler := grpchandler.NewEventHandler(calendar)
+	grpcServer := internalgrpc.NewServer(l, grpcHandler)
+
+	go func() {
+		if err := grpcServer.Run(cfg.MakeGRPCAddr()); err != nil {
+			l.Error("Grpc server failed", slog.String("error", err.Error()))
 		}
 	}()
 
@@ -74,10 +85,12 @@ func main() {
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer shutdownCancel()
 
-	if err := server.Stop(shutdownCtx); err != nil {
+	if err := httpServer.Stop(shutdownCtx); err != nil {
 		l.Error("Shutdown failed", slog.String("error", err.Error()))
 		panic("server shutdown failed")
 	}
+
+	grpcServer.Stop()
 
 	l.Info("Application stopped")
 }
