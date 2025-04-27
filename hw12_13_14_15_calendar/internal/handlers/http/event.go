@@ -3,6 +3,7 @@ package httphandler
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -11,6 +12,8 @@ import (
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 	"github.com/go-playground/validator/v10"
 )
+
+const dateFormat = "2006-01-02"
 
 type EventHandler struct {
 	app       app.Application
@@ -187,4 +190,66 @@ func (e *EventHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondWithJSON(w, http.StatusOK, events)
+}
+
+func (e *EventHandler) GetDayEvents(w http.ResponseWriter, r *http.Request) {
+	date, err := parseDateParam(r)
+	if err != nil {
+		RespondWithJSON(w, http.StatusBadRequest, Error(err.Error()))
+		return
+	}
+
+	events, err := e.app.GetEventsForDay(r.Context(), date)
+	if err != nil {
+		RespondWithJSON(w, http.StatusInternalServerError, Error("Failed to get day events: "+err.Error()))
+		return
+	}
+
+	RespondWithJSON(w, http.StatusOK, events)
+}
+
+func (e *EventHandler) GetWeekEvents(w http.ResponseWriter, r *http.Request) {
+	date, err := parseDateParam(r)
+	if err != nil {
+		RespondWithJSON(w, http.StatusBadRequest, Error(err.Error()))
+		return
+	}
+
+	events, err := e.app.GetEventsForWeek(r.Context(), date)
+	if err != nil {
+		RespondWithJSON(w, http.StatusInternalServerError, Error("Failed to get week events: "+err.Error()))
+		return
+	}
+
+	RespondWithJSON(w, http.StatusOK, events)
+}
+
+func (e *EventHandler) GetMonthEvents(w http.ResponseWriter, r *http.Request) {
+	date, err := parseDateParam(r)
+	if err != nil {
+		RespondWithJSON(w, http.StatusBadRequest, Error(err.Error()))
+		return
+	}
+
+	events, err := e.app.GetEventsForMonth(r.Context(), date)
+	if err != nil {
+		RespondWithJSON(w, http.StatusInternalServerError, Error("Failed to get month events: "+err.Error()))
+		return
+	}
+
+	RespondWithJSON(w, http.StatusOK, events)
+}
+
+func parseDateParam(r *http.Request) (time.Time, error) {
+	dateStr := r.URL.Query().Get("date")
+	if dateStr == "" {
+		return time.Time{}, fmt.Errorf("date parameter is required (format: YYYY-MM-DD)")
+	}
+
+	date, err := time.Parse(dateFormat, dateStr)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("invalid date format, use YYYY-MM-DD (e.g. 2023-12-31)")
+	}
+
+	return date, nil
 }

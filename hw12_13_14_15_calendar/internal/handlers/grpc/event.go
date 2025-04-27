@@ -118,6 +118,41 @@ func (h *EventHandler) ListEvents(ctx context.Context, _ *pb.EmptyRequest) (*pb.
 	return &pb.EventListResponse{Events: eventList}, nil
 }
 
+func (h *EventHandler) ListDayEvents(ctx context.Context, req *pb.DateRequest) (*pb.EventListResponse, error) {
+	events, err := h.app.GetEventsForDay(ctx, req.GetDate().AsTime())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return eventsToResponse(events), nil
+}
+
+func (h *EventHandler) ListWeekEvents(ctx context.Context, req *pb.DateRequest) (*pb.EventListResponse, error) {
+	events, err := h.app.GetEventsForWeek(ctx, req.GetDate().AsTime())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return eventsToResponse(events), nil
+}
+
+func (h *EventHandler) ListMonthEvents(ctx context.Context, req *pb.DateRequest) (*pb.EventListResponse, error) {
+	events, err := h.app.GetEventsForMonth(ctx, req.GetDate().AsTime())
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return eventsToResponse(events), nil
+}
+
+func eventsToResponse(events []storage.Event) *pb.EventListResponse {
+	eventList := make([]*pb.Event, len(events))
+	for i, event := range events {
+		eventList[i] = eventToProto(event)
+	}
+	return &pb.EventListResponse{Events: eventList}
+}
+
 func createOrUpdateRequestToStorageParams(
 	req *pb.CreateOrUpdateEventRequest,
 ) (*storage.CreateOrUpdateEventParams, error) {

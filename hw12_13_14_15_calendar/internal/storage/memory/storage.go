@@ -2,7 +2,9 @@ package memorystorage
 
 import (
 	"context"
+	"sort"
 	"sync"
+	"time"
 
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 	"github.com/google/uuid"
@@ -109,5 +111,29 @@ func (s *Storage) GetAllEvents(ctx context.Context) ([]storage.Event, error) {
 			events = append(events, e)
 		}
 		return events, nil
+	}
+}
+
+func (s *Storage) GetEventsByPeriod(ctx context.Context, start, end time.Time) ([]storage.Event, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		s.mu.RLock()
+		defer s.mu.RUnlock()
+
+		var result []storage.Event
+		for _, event := range s.events {
+			if (event.StartTime.Equal(start) || event.StartTime.After(start)) &&
+				event.StartTime.Before(end) {
+				result = append(result, event)
+			}
+		}
+
+		sort.Slice(result, func(i, j int) bool {
+			return result[i].StartTime.Before(result[j].StartTime)
+		})
+
+		return result, nil
 	}
 }

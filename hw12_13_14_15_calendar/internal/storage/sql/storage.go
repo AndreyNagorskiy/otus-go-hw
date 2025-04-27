@@ -3,6 +3,7 @@ package sqlstorage
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -96,6 +97,36 @@ func (s *Storage) GetAllEvents(ctx context.Context) ([]storage.Event, error) {
 	rows, err := s.db.Query(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get events: %w", err)
+	}
+	defer rows.Close()
+
+	var events []storage.Event
+	for rows.Next() {
+		var event storage.Event
+		if err := rows.Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime, &event.Description,
+			&event.OwnerID, &event.NotifyBefore); err != nil {
+			return nil, fmt.Errorf("failed to scan event: %w", err)
+		}
+		events = append(events, event)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
+
+	return events, nil
+}
+
+func (s *Storage) GetEventsByPeriod(ctx context.Context, start, end time.Time) ([]storage.Event, error) {
+	query := `
+        SELECT id, title, start_time, end_time, description, owner_id, notify_before
+        FROM events
+        WHERE start_time >= $1 AND start_time < $2
+        ORDER BY start_time`
+
+	rows, err := s.db.Query(ctx, query, start, end)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get events by period: %w", err)
 	}
 	defer rows.Close()
 

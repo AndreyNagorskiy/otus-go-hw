@@ -29,6 +29,9 @@ func NewServer(logger logger.Logger, app app.Application, addr string) *Server {
 	mux.HandleFunc("DELETE /api/events/{id}", eventH.Delete)
 	mux.HandleFunc("GET /api/events/{id}", eventH.Get)
 	mux.HandleFunc("GET /api/events", eventH.GetAll)
+	mux.HandleFunc("GET /api/events/day", eventH.GetDayEvents)
+	mux.HandleFunc("GET /api/events/week", eventH.GetWeekEvents)
+	mux.HandleFunc("GET /api/events/month", eventH.GetMonthEvents)
 
 	m := loggingMiddleware(mux)
 

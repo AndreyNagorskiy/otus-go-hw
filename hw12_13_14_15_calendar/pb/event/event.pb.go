@@ -295,6 +295,50 @@ func (x *GetEventRequest) GetId() string {
 	return ""
 }
 
+type DateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Date          *timestamp.Timestamp   `protobuf:"bytes,1,opt,name=date,proto3" json:"date,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DateRequest) Reset() {
+	*x = DateRequest{}
+	mi := &file_event_event_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DateRequest) ProtoMessage() {}
+
+func (x *DateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_event_event_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DateRequest.ProtoReflect.Descriptor instead.
+func (*DateRequest) Descriptor() ([]byte, []int) {
+	return file_event_event_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *DateRequest) GetDate() *timestamp.Timestamp {
+	if x != nil {
+		return x.Date
+	}
+	return nil
+}
+
 type EventListResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Events        []*Event               `protobuf:"bytes,1,rep,name=events,proto3" json:"events,omitempty"`
@@ -304,7 +348,7 @@ type EventListResponse struct {
 
 func (x *EventListResponse) Reset() {
 	*x = EventListResponse{}
-	mi := &file_event_event_proto_msgTypes[4]
+	mi := &file_event_event_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -316,7 +360,7 @@ func (x *EventListResponse) String() string {
 func (*EventListResponse) ProtoMessage() {}
 
 func (x *EventListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_event_event_proto_msgTypes[4]
+	mi := &file_event_event_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -329,7 +373,7 @@ func (x *EventListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EventListResponse.ProtoReflect.Descriptor instead.
 func (*EventListResponse) Descriptor() ([]byte, []int) {
-	return file_event_event_proto_rawDescGZIP(), []int{4}
+	return file_event_event_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *EventListResponse) GetEvents() []*Event {
@@ -347,7 +391,7 @@ type EmptyRequest struct {
 
 func (x *EmptyRequest) Reset() {
 	*x = EmptyRequest{}
-	mi := &file_event_event_proto_msgTypes[5]
+	mi := &file_event_event_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -359,7 +403,7 @@ func (x *EmptyRequest) String() string {
 func (*EmptyRequest) ProtoMessage() {}
 
 func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_event_event_proto_msgTypes[5]
+	mi := &file_event_event_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -372,7 +416,7 @@ func (x *EmptyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmptyRequest.ProtoReflect.Descriptor instead.
 func (*EmptyRequest) Descriptor() ([]byte, []int) {
-	return file_event_event_proto_rawDescGZIP(), []int{5}
+	return file_event_event_proto_rawDescGZIP(), []int{6}
 }
 
 type EmptyResponse struct {
@@ -383,7 +427,7 @@ type EmptyResponse struct {
 
 func (x *EmptyResponse) Reset() {
 	*x = EmptyResponse{}
-	mi := &file_event_event_proto_msgTypes[6]
+	mi := &file_event_event_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -395,7 +439,7 @@ func (x *EmptyResponse) String() string {
 func (*EmptyResponse) ProtoMessage() {}
 
 func (x *EmptyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_event_event_proto_msgTypes[6]
+	mi := &file_event_event_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -408,7 +452,7 @@ func (x *EmptyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmptyResponse.ProtoReflect.Descriptor instead.
 func (*EmptyResponse) Descriptor() ([]byte, []int) {
-	return file_event_event_proto_rawDescGZIP(), []int{6}
+	return file_event_event_proto_rawDescGZIP(), []int{7}
 }
 
 var File_event_event_proto protoreflect.FileDescriptor
@@ -441,18 +485,23 @@ const file_event_event_proto_rawDesc = "" +
 	"\x12DeleteEventRequest\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"!\n" +
 	"\x0fGetEventRequest\x12\x0e\n" +
-	"\x02id\x18\x01 \x01(\tR\x02id\"9\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"=\n" +
+	"\vDateRequest\x12.\n" +
+	"\x04date\x18\x01 \x01(\v2\x1a.google.protobuf.TimestampR\x04date\"9\n" +
 	"\x11EventListResponse\x12$\n" +
 	"\x06events\x18\x01 \x03(\v2\f.event.EventR\x06events\"\x0e\n" +
 	"\fEmptyRequest\"\x0f\n" +
-	"\rEmptyResponse2\xbd\x02\n" +
+	"\rEmptyResponse2\x83\x04\n" +
 	"\x06Events\x12C\n" +
 	"\x06Create\x12!.event.CreateOrUpdateEventRequest\x1a\x14.event.EmptyResponse\"\x00\x12-\n" +
 	"\x03Get\x12\x16.event.GetEventRequest\x1a\f.event.Event\"\x00\x12C\n" +
 	"\x06Update\x12!.event.CreateOrUpdateEventRequest\x1a\x14.event.EmptyResponse\"\x00\x12;\n" +
 	"\x06Delete\x12\x19.event.DeleteEventRequest\x1a\x14.event.EmptyResponse\"\x00\x12=\n" +
 	"\n" +
-	"ListEvents\x12\x13.event.EmptyRequest\x1a\x18.event.EventListResponse\"\x00B\aZ\x05./;pbb\x06proto3"
+	"ListEvents\x12\x13.event.EmptyRequest\x1a\x18.event.EventListResponse\"\x00\x12?\n" +
+	"\rListDayEvents\x12\x12.event.DateRequest\x1a\x18.event.EventListResponse\"\x00\x12@\n" +
+	"\x0eListWeekEvents\x12\x12.event.DateRequest\x1a\x18.event.EventListResponse\"\x00\x12A\n" +
+	"\x0fListMonthEvents\x12\x12.event.DateRequest\x1a\x18.event.EventListResponse\"\x00B\aZ\x05./;pbb\x06proto3"
 
 var (
 	file_event_event_proto_rawDescOnce sync.Once
@@ -466,41 +515,49 @@ func file_event_event_proto_rawDescGZIP() []byte {
 	return file_event_event_proto_rawDescData
 }
 
-var file_event_event_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_event_event_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_event_event_proto_goTypes = []any{
 	(*Event)(nil),                      // 0: event.Event
 	(*CreateOrUpdateEventRequest)(nil), // 1: event.CreateOrUpdateEventRequest
 	(*DeleteEventRequest)(nil),         // 2: event.DeleteEventRequest
 	(*GetEventRequest)(nil),            // 3: event.GetEventRequest
-	(*EventListResponse)(nil),          // 4: event.EventListResponse
-	(*EmptyRequest)(nil),               // 5: event.EmptyRequest
-	(*EmptyResponse)(nil),              // 6: event.EmptyResponse
-	(*timestamp.Timestamp)(nil),        // 7: google.protobuf.Timestamp
-	(*duration.Duration)(nil),          // 8: google.protobuf.Duration
+	(*DateRequest)(nil),                // 4: event.DateRequest
+	(*EventListResponse)(nil),          // 5: event.EventListResponse
+	(*EmptyRequest)(nil),               // 6: event.EmptyRequest
+	(*EmptyResponse)(nil),              // 7: event.EmptyResponse
+	(*timestamp.Timestamp)(nil),        // 8: google.protobuf.Timestamp
+	(*duration.Duration)(nil),          // 9: google.protobuf.Duration
 }
 var file_event_event_proto_depIdxs = []int32{
-	7,  // 0: event.Event.start_time:type_name -> google.protobuf.Timestamp
-	7,  // 1: event.Event.end_time:type_name -> google.protobuf.Timestamp
-	8,  // 2: event.Event.notify_before:type_name -> google.protobuf.Duration
-	7,  // 3: event.CreateOrUpdateEventRequest.start_time:type_name -> google.protobuf.Timestamp
-	7,  // 4: event.CreateOrUpdateEventRequest.end_time:type_name -> google.protobuf.Timestamp
-	8,  // 5: event.CreateOrUpdateEventRequest.notify_before:type_name -> google.protobuf.Duration
-	0,  // 6: event.EventListResponse.events:type_name -> event.Event
-	1,  // 7: event.Events.Create:input_type -> event.CreateOrUpdateEventRequest
-	3,  // 8: event.Events.Get:input_type -> event.GetEventRequest
-	1,  // 9: event.Events.Update:input_type -> event.CreateOrUpdateEventRequest
-	2,  // 10: event.Events.Delete:input_type -> event.DeleteEventRequest
-	5,  // 11: event.Events.ListEvents:input_type -> event.EmptyRequest
-	6,  // 12: event.Events.Create:output_type -> event.EmptyResponse
-	0,  // 13: event.Events.Get:output_type -> event.Event
-	6,  // 14: event.Events.Update:output_type -> event.EmptyResponse
-	6,  // 15: event.Events.Delete:output_type -> event.EmptyResponse
-	4,  // 16: event.Events.ListEvents:output_type -> event.EventListResponse
-	12, // [12:17] is the sub-list for method output_type
-	7,  // [7:12] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	8,  // 0: event.Event.start_time:type_name -> google.protobuf.Timestamp
+	8,  // 1: event.Event.end_time:type_name -> google.protobuf.Timestamp
+	9,  // 2: event.Event.notify_before:type_name -> google.protobuf.Duration
+	8,  // 3: event.CreateOrUpdateEventRequest.start_time:type_name -> google.protobuf.Timestamp
+	8,  // 4: event.CreateOrUpdateEventRequest.end_time:type_name -> google.protobuf.Timestamp
+	9,  // 5: event.CreateOrUpdateEventRequest.notify_before:type_name -> google.protobuf.Duration
+	8,  // 6: event.DateRequest.date:type_name -> google.protobuf.Timestamp
+	0,  // 7: event.EventListResponse.events:type_name -> event.Event
+	1,  // 8: event.Events.Create:input_type -> event.CreateOrUpdateEventRequest
+	3,  // 9: event.Events.Get:input_type -> event.GetEventRequest
+	1,  // 10: event.Events.Update:input_type -> event.CreateOrUpdateEventRequest
+	2,  // 11: event.Events.Delete:input_type -> event.DeleteEventRequest
+	6,  // 12: event.Events.ListEvents:input_type -> event.EmptyRequest
+	4,  // 13: event.Events.ListDayEvents:input_type -> event.DateRequest
+	4,  // 14: event.Events.ListWeekEvents:input_type -> event.DateRequest
+	4,  // 15: event.Events.ListMonthEvents:input_type -> event.DateRequest
+	7,  // 16: event.Events.Create:output_type -> event.EmptyResponse
+	0,  // 17: event.Events.Get:output_type -> event.Event
+	7,  // 18: event.Events.Update:output_type -> event.EmptyResponse
+	7,  // 19: event.Events.Delete:output_type -> event.EmptyResponse
+	5,  // 20: event.Events.ListEvents:output_type -> event.EventListResponse
+	5,  // 21: event.Events.ListDayEvents:output_type -> event.EventListResponse
+	5,  // 22: event.Events.ListWeekEvents:output_type -> event.EventListResponse
+	5,  // 23: event.Events.ListMonthEvents:output_type -> event.EventListResponse
+	16, // [16:24] is the sub-list for method output_type
+	8,  // [8:16] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_event_event_proto_init() }
@@ -516,7 +573,7 @@ func file_event_event_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_event_event_proto_rawDesc), len(file_event_event_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

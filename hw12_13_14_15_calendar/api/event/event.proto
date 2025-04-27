@@ -12,6 +12,9 @@ service Events {
   rpc Update(CreateOrUpdateEventRequest) returns (EmptyResponse) {}
   rpc Delete(DeleteEventRequest) returns (EmptyResponse) {}
   rpc ListEvents(EmptyRequest) returns (EventListResponse) {}
+  rpc ListDayEvents(DateRequest) returns (EventListResponse) {}
+  rpc ListWeekEvents(DateRequest) returns (EventListResponse) {}
+  rpc ListMonthEvents(DateRequest) returns (EventListResponse) {}
 }
 
 message Event {
@@ -36,6 +39,7 @@ message CreateOrUpdateEventRequest {
 
 message DeleteEventRequest { string id = 1; }
 message GetEventRequest { string id = 1; }
+message DateRequest { google.protobuf.Timestamp date = 1; }
 
 message EventListResponse {
   repeated Event events = 1;

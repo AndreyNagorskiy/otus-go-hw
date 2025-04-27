@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"time"
 
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/logger"
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
@@ -20,6 +21,7 @@ type Storage interface {
 	UpdateEvent(ctx context.Context, event storage.Event) error
 	DeleteEvent(ctx context.Context, id string) error
 	GetAllEvents(ctx context.Context) ([]storage.Event, error)
+	GetEventsByPeriod(ctx context.Context, start, end time.Time) ([]storage.Event, error)
 }
 
 type Application interface {
@@ -28,6 +30,10 @@ type Application interface {
 	DeleteEvent(ctx context.Context, id string) error
 	GetEvent(ctx context.Context, id string) (*storage.Event, error)
 	GetAllEvents(ctx context.Context) ([]storage.Event, error)
+	GetEventsByPeriod(ctx context.Context, start, end time.Time) ([]storage.Event, error)
+	GetEventsForDay(ctx context.Context, day time.Time) ([]storage.Event, error)
+	GetEventsForWeek(ctx context.Context, weekStart time.Time) ([]storage.Event, error)
+	GetEventsForMonth(ctx context.Context, monthStart time.Time) ([]storage.Event, error)
 }
 
 func New(logger logger.Logger, storage Storage) *App {
@@ -96,4 +102,39 @@ func (a *App) GetAllEvents(ctx context.Context) ([]storage.Event, error) {
 	}
 
 	return events, err
+}
+
+func (a *App) GetEventsByPeriod(ctx context.Context, start, end time.Time) ([]storage.Event, error) {
+	events, err := a.storage.GetEventsByPeriod(ctx, start, end)
+	if err != nil {
+		a.logger.Error("Failed to get events by period",
+			slog.String("start", start.String()),
+			slog.String("end", end.String()),
+			slog.String("error", err.Error()))
+	}
+
+	return events, nil
+}
+
+func (a *App) GetEventsForDay(ctx context.Context, day time.Time) ([]storage.Event, error) {
+	start := time.Date(day.Year(), day.Month(), day.Day(), 0, 0, 0, 0, day.Location())
+	end := start.AddDate(0, 0, 1)
+
+	return a.GetEventsByPeriod(ctx, start, end)
+}
+
+func (a *App) GetEventsForWeek(ctx context.Context, weekStart time.Time) ([]storage.Event, error) {
+	for weekStart.Weekday() != time.Monday {
+		weekStart = weekStart.AddDate(0, 0, -1)
+	}
+	end := weekStart.AddDate(0, 0, 7)
+
+	return a.GetEventsByPeriod(ctx, weekStart, end)
+}
+
+func (a *App) GetEventsForMonth(ctx context.Context, monthStart time.Time) ([]storage.Event, error) {
+	start := time.Date(monthStart.Year(), monthStart.Month(), 1, 0, 0, 0, 0, monthStart.Location())
+	end := start.AddDate(0, 1, 0)
+
+	return a.GetEventsByPeriod(ctx, start, end)
 }
