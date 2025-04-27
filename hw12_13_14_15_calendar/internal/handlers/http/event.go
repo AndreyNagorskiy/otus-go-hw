@@ -125,8 +125,8 @@ func (e *EventHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	err = e.app.UpdateEvent(r.Context(), event)
 	if err != nil {
-		if errors.Is(err, storage.ErrEventAlreadyExists) {
-			RespondWithJSON(w, http.StatusBadRequest, "Event already exists")
+		if errors.Is(err, storage.ErrEventNotFound) {
+			RespondWithJSON(w, http.StatusNotFound, "Event not found")
 			return
 		}
 

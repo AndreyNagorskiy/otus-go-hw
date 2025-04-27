@@ -48,19 +48,19 @@ func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdate
 	}
 }
 
-func (s *Storage) GetEvent(ctx context.Context, id string) (storage.Event, error) {
+func (s *Storage) GetEvent(ctx context.Context, id string) (*storage.Event, error) {
 	select {
 	case <-ctx.Done():
-		return storage.Event{}, ctx.Err()
+		return nil, ctx.Err()
 	default:
 		s.mu.RLock()
 		defer s.mu.RUnlock()
 
 		event, exists := s.events[id]
 		if !exists {
-			return storage.Event{}, storage.ErrEventNotFound
+			return nil, storage.ErrEventNotFound
 		}
-		return event, nil
+		return &event, nil
 	}
 }
 

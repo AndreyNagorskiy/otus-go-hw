@@ -30,7 +30,7 @@ func (s *Storage) CreateEvent(ctx context.Context, params storage.CreateOrUpdate
 	return nil, nil
 }
 
-func (s *Storage) GetEvent(ctx context.Context, id string) (storage.Event, error) {
+func (s *Storage) GetEvent(ctx context.Context, id string) (*storage.Event, error) {
 	query := `
 		SELECT id, title, start_time, end_time, description, owner_id, notify_before
 		FROM events 
@@ -41,10 +41,10 @@ func (s *Storage) GetEvent(ctx context.Context, id string) (storage.Event, error
 	err := s.db.QueryRow(ctx, query, id).Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime,
 		&event.Description, &event.OwnerID, &event.NotifyBefore)
 	if err != nil {
-		return storage.Event{}, fmt.Errorf("failed to get event: %w", err)
+		return nil, fmt.Errorf("failed to get event: %w", err)
 	}
 
-	return event, nil
+	return &event, nil
 }
 
 func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) error {

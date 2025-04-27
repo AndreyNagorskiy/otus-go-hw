@@ -52,7 +52,7 @@ func (h *EventHandler) Get(ctx context.Context, req *pb.GetEventRequest) (*pb.Ev
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return eventToProto(event), nil
+	return eventToProto(*event), nil
 }
 
 func (h *EventHandler) Update(ctx context.Context, req *pb.CreateOrUpdateEventRequest) (*pb.EmptyResponse, error) {
