@@ -1,5 +1,22 @@
 package main
 
+import (
+	"fmt"
+	"os"
+)
+
 func main() {
-	// Place your code here.
+	args := os.Args
+
+	if len(args) < 3 {
+		panic("wrong command arguments count")
+	}
+
+	env, err := ReadDir(args[1])
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	code := RunCmd(args[2:], env)
+	os.Exit(code)
 }
