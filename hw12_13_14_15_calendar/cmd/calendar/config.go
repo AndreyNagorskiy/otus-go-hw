@@ -16,10 +16,11 @@ const (
 )
 
 type Config struct {
-	LogLevel    string   `yaml:"logLevel" env:"LOG_LEVEL" env-default:"info"`
-	StorageType string   `yaml:"storageType" env:"STORAGE_TYPE" env-default:"memory"`
-	DB          Database `yaml:"db"`
-	Server      Server   `yaml:"server"`
+	LogLevel    string     `yaml:"log_level" env:"LOG_LEVEL" env-default:"info"`
+	StorageType string     `yaml:"storage_type" env:"STORAGE_TYPE" env-default:"memory"`
+	DB          Database   `yaml:"db"`
+	HTTPServer  HTTPServer `yaml:"http_server" env-prefix:"HTTP_"`
+	GRPCServer  GrpcServer `yaml:"grpc_server" env-prefix:"GRPC_"`
 }
 
 type Database struct {
@@ -30,9 +31,14 @@ type Database struct {
 	Password string `yaml:"password" env:"DB_PASSWORD" env-default:""`
 }
 
-type Server struct {
-	Host string `yaml:"host" env:"SERVER_HOST" env-default:"localhost"`
-	Port int    `yaml:"port" env:"SERVER_PORT" env-default:"8080"`
+type HTTPServer struct {
+	Host string `yaml:"host" env:"HOST" env-default:"localhost"`
+	Port int    `yaml:"port" env:"PORT" env-default:"8080"`
+}
+
+type GrpcServer struct {
+	Host string `yaml:"host" env:"HOST" env-default:"localhost"`
+	Port int    `yaml:"port" env:"PORT" env-default:"8082"`
 }
 
 func MustLoad(cfgFilePath string) Config {
@@ -65,4 +71,12 @@ func (c *Config) MakeDBConnectionString() string {
 		c.DB.Port,
 		c.DB.Name,
 	)
+}
+
+func (c *Config) MakeHTTPAddr() string {
+	return fmt.Sprintf("%s:%d", c.HTTPServer.Host, c.HTTPServer.Port)
+}
+
+func (c *Config) MakeGRPCAddr() string {
+	return fmt.Sprintf("%s:%d", c.GRPCServer.Host, c.GRPCServer.Port)
 }
