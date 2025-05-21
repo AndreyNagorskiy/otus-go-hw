@@ -40,7 +40,7 @@ func (c *client) Connect() error {
 	c.conn = conn
 	_, err = fmt.Fprintf(os.Stderr, "...Connected to %s\n", c.address)
 
-	return nil
+	return err
 }
 
 func (c *client) Close() error {
