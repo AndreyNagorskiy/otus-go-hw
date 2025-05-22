@@ -137,3 +137,62 @@ func (s *Storage) GetEventsByPeriod(ctx context.Context, start, end time.Time) (
 		return result, nil
 	}
 }
+
+func (s *Storage) DeleteEventsOlderThan(ctx context.Context, cutoffTime time.Time) (int64, error) {
+	select {
+	case <-ctx.Done():
+		return 0, ctx.Err()
+	default:
+		s.mu.Lock()
+		defer s.mu.Unlock()
+
+		deletedCount := int64(0)
+
+		// Временный слайс для хранения ключей на удаление
+		toDelete := make([]string, 0, len(s.events))
+
+		// Сначала собираем ключи событий для удаления
+		for id, event := range s.events {
+			if event.EndTime.Before(cutoffTime) {
+				toDelete = append(toDelete, id)
+			}
+		}
+
+		for _, id := range toDelete {
+			delete(s.events, id)
+			deletedCount++
+		}
+
+		return deletedCount, nil
+	}
+}
+
+func (s *Storage) GetEventsToNotify(ctx context.Context) ([]storage.Event, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		s.mu.RLock()
+		defer s.mu.RUnlock()
+
+		now := time.Now()
+		var eventsToNotify []storage.Event
+
+		for _, event := range s.events {
+			if event.NotifyBefore == nil {
+				continue
+			}
+
+			if event.StartTime.Before(now) {
+				continue
+			}
+
+			notifyTime := event.StartTime.Add(-*event.NotifyBefore)
+			if notifyTime.Before(now) || notifyTime.Equal(now) {
+				eventsToNotify = append(eventsToNotify, event)
+			}
+		}
+
+		return eventsToNotify, nil
+	}
+}

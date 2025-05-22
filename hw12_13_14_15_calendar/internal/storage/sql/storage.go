@@ -146,3 +146,47 @@ func (s *Storage) GetEventsByPeriod(ctx context.Context, start, end time.Time) (
 
 	return events, nil
 }
+
+func (s *Storage) DeleteEventsOlderThan(ctx context.Context, cutoffTime time.Time) (int64, error) {
+	query := `
+        DELETE FROM events
+        WHERE end_time < $1
+        RETURNING id` // Добавляем RETURNING для получения количества
+
+	result, err := s.db.Exec(ctx, query, cutoffTime)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete old events: %w", err)
+	}
+
+	return result.RowsAffected(), nil
+}
+
+func (s *Storage) GetEventsToNotify(ctx context.Context) ([]storage.Event, error) {
+	query := `
+        SELECT id, title, start_time, end_time, description, owner_id, notify_before
+        FROM events
+        WHERE 
+            -- Событие ещё не началось
+            start_time > CURRENT_TIMESTAMP AND
+            -- Время уведомления наступило (start_time - notify_before <= CURRENT_TIMESTAMP)
+            (start_time - COALESCE(notify_before, INTERVAL '0 seconds')) <= CURRENT_TIMESTAMP AND
+            -- У события вообще задано уведомление
+            notify_before IS NOT NULL`
+
+	rows, err := s.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query events to notify: %w", err)
+	}
+	defer rows.Close()
+
+	var events []storage.Event
+	for rows.Next() {
+		var event storage.Event
+		if err := rows.Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime, &event.Description, &event.OwnerID, &event.NotifyBefore); err != nil {
+			return nil, fmt.Errorf("failed to scan event: %w", err)
+		}
+		events = append(events, event)
+	}
+
+	return events, nil
+}

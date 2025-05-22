@@ -22,6 +22,8 @@ type Storage interface {
 	DeleteEvent(ctx context.Context, id string) error
 	GetAllEvents(ctx context.Context) ([]storage.Event, error)
 	GetEventsByPeriod(ctx context.Context, start, end time.Time) ([]storage.Event, error)
+	DeleteEventsOlderThan(ctx context.Context, cutoffTime time.Time) (int64, error)
+	GetEventsToNotify(ctx context.Context) ([]storage.Event, error)
 }
 
 type Application interface {
