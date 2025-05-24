@@ -182,7 +182,10 @@ func (s *Storage) GetEventsToNotify(ctx context.Context) ([]storage.Event, error
 	var events []storage.Event
 	for rows.Next() {
 		var event storage.Event
-		if err := rows.Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime, &event.Description, &event.OwnerID, &event.NotifyBefore); err != nil {
+		if err := rows.Scan(
+			&event.ID, &event.Title, &event.StartTime, &event.EndTime, &event.Description,
+			&event.OwnerID, &event.NotifyBefore,
+		); err != nil {
 			return nil, fmt.Errorf("failed to scan event: %w", err)
 		}
 		events = append(events, event)

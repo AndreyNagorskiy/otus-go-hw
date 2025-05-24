@@ -8,14 +8,8 @@ import (
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
-const (
-	MemoryStorageType = "memory"
-	SQLStorageType    = "sql"
-)
-
 type Config struct {
 	LogLevel         string        `yaml:"log_level" env:"LOG_LEVEL" env-default:"info"`
-	StorageType      string        `yaml:"storage_type" env:"STORAGE_TYPE" env-default:"memory"`
 	DB               Database      `yaml:"db"`
 	RabbitMQ         RabbitMQ      `yaml:"rabbitmq" env-prefix:"RABBITMQ_"`
 	ReminderInterval time.Duration `yaml:"reminder_interval" env:"REMINDER_INTERVAL" env-default:"1m"`
@@ -46,18 +40,7 @@ func MustLoad(cfgFilePath string) Config {
 		log.Fatalf("failed to read config: %v", err)
 	}
 
-	validateStorageType(cfg.StorageType)
-
 	return cfg
-}
-
-func validateStorageType(storageType string) {
-	switch storageType {
-	case MemoryStorageType, SQLStorageType:
-		return
-	default:
-		log.Fatalf("unknown storage type: %s", storageType)
-	}
 }
 
 func (c *Config) MakeDBConnectionString() string {
