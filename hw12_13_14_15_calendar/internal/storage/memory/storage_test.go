@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/AndreyNagorskiy/otus-go-hw/hw12_13_14_15_calendar/internal/storage"
+	"github.com/stretchr/testify/assert"
 )
 
 func makeCreateOrUpdateEventParams() storage.CreateOrUpdateEventParams {
@@ -348,6 +349,11 @@ func TestStorage_ContextTimeout(t *testing.T) {
 			fn:   func() error { _, err := s.GetAllEvents(ctx); return err },
 			want: context.DeadlineExceeded,
 		},
+		{
+			name: "DeleteEventsOlderThan",
+			fn:   func() error { _, err := s.DeleteEventsOlderThan(ctx, time.Now()); return err },
+			want: context.DeadlineExceeded,
+		},
 	}
 
 	for _, tt := range tests {
@@ -358,4 +364,20 @@ func TestStorage_ContextTimeout(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestDeleteEventsOlderThan(t *testing.T) {
+	s := NewStorage()
+	now := time.Now()
+
+	s.events["1"] = storage.Event{EndTime: now.AddDate(-2, 0, 0)} // Старое
+	s.events["2"] = storage.Event{EndTime: now.AddDate(0, -1, 0)} // Недавнее
+
+	count, err := s.DeleteEventsOlderThan(context.Background(), now.AddDate(-1, 0, 0))
+
+	assert.NoError(t, err)
+	assert.Equal(t, int64(1), count)
+	assert.Len(t, s.events, 1)
+	_, exists := s.events["1"]
+	assert.False(t, exists)
 }

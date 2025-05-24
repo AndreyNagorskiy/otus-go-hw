@@ -33,7 +33,7 @@ func main() {
 	}
 
 	cfg := MustLoad(configFile)
-	l := logger.NewLogger(cfg.LogLevel)
+	l := logger.NewLogger(cfg.LogLevel, "calendar")
 
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()

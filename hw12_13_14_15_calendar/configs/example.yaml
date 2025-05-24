@@ -12,3 +12,13 @@ http_server:
 grpc_server:
   host: localhost
   port: 8082
+
+scheduler_interval: 1m
+cleanup_interval: 24h
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  username: calendar
+  password: calendar
+  vhost: /
