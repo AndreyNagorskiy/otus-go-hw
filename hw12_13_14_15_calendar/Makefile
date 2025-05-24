@@ -1,4 +1,4 @@
-BIN := "./bin/calendar"
+BIN := "./bin/"
 DOCKER_IMG="calendar:develop"
 CONFIG_PATH := "./configs/config.yaml"
 MIGRATIONS_DIR := "./internal/storage/migrations"
@@ -7,8 +7,19 @@ DB_DSN := "postgres://user:password@localhost:5432/calendar?sslmode=disable"
 GIT_HASH := $(shell git log --format="%h" -n 1)
 LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%dT%H:%M:%S) -X main.gitHash=$(GIT_HASH)
 
-build:
+build: build_calendar build_scheduler build_sender
+
+build_calendar:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+
+build_scheduler:
+	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar_scheduler
+
+build_sender:
+	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar_sender
+
+clean-build:
+	rm -rf $(BIN)
 
 run: build
 	$(BIN) -config $(CONFIG_PATH)
@@ -52,4 +63,4 @@ migrate-status:
 migrate-create:
 	goose -dir $(MIGRATIONS_DIR) create $(name) sql
 
-.PHONY: build run build-img run-img version test lint lint-fix generate migrate-up migrate-down migrate-status migrate-create
+.PHONY: build build_calendar build_scheduler build_sender clean-build run build-img run-img version test lint lint-fix generate migrate-up migrate-down migrate-status migrate-create

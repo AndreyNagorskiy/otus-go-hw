@@ -32,13 +32,14 @@ func main() {
 		URL:          cfg.MakeAMQPConnectionString(),
 		Exchange:     amqp.NotificationExchange,
 		ExchangeType: "fanout",
-		Queue:        "logs-processor",
+		Queue:        "notifications-processor",
 		RoutingKey:   "",
 	}
 
 	mq, err := amqp.New(amqpCfg, l)
 	if err != nil {
 		l.Error("Unable to connect to amqp server", slog.String("error", err.Error()))
+		return
 	}
 	defer func() {
 		if err := mq.Close(); err != nil {
@@ -60,7 +61,6 @@ func main() {
 		}
 	}()
 
-	done := make(chan struct{})
 	consumeErr := make(chan error, 1)
 
 	go func() {
@@ -85,7 +85,6 @@ func main() {
 		if err != nil {
 			consumeErr <- err
 		}
-		close(done)
 	}()
 
 	l.Info("Sender started successfully")
@@ -97,8 +96,6 @@ func main() {
 
 		// Даем фиксированное время на завершение
 		select {
-		case <-done:
-			l.Info("Consumer finished processing messages")
 		case err := <-consumeErr:
 			l.Info("Consumer stopped with error", slog.String("error", err.Error()))
 		case <-time.After(5 * time.Second):
@@ -108,9 +105,6 @@ func main() {
 	case err := <-consumeErr:
 		l.Error("Consumer failed", slog.String("error", err.Error()))
 		cancel()
-
-	case <-done:
-		l.Info("Consumer finished normally")
 	}
 
 	l.Info("Service shutdown completed")
