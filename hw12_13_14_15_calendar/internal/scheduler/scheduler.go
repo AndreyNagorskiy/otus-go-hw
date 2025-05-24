@@ -64,6 +64,8 @@ func (s *Scheduler) Stop() {
 }
 
 func (s *Scheduler) scanAndProcessEvents(ctx context.Context) {
+	s.l.Debug("Scanning for events to notify")
+
 	events, err := s.storage.GetEventsToNotify(ctx)
 	if err != nil {
 		s.l.Error("Failed to get pending events", slog.String("error", err.Error()))
@@ -101,6 +103,7 @@ func (s *Scheduler) processEvent(event storage.Event) error {
 }
 
 func (s *Scheduler) cleanupOldEvents(ctx context.Context) {
+	s.l.Debug("Cleaning up old events")
 	oneYearAgo := time.Now().AddDate(-1, 0, 0)
 
 	deletedCount, err := s.storage.DeleteEventsOlderThan(ctx, oneYearAgo)
