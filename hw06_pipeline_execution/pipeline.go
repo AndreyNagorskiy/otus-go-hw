@@ -9,6 +9,62 @@ type (
 type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
-	// Place your code here.
-	return nil
+	out := in
+
+	for _, stage := range stages {
+		out = handleStage(done, stage, out)
+	}
+
+	// Промежуточный канал для отслеживания сигнала done
+	resultCh := make(Bi)
+	go func() {
+		defer close(resultCh)
+		for {
+			select {
+			case <-done:
+				return
+			case v, ok := <-out:
+				if !ok {
+					return
+				}
+				select {
+				case <-done:
+					return
+				case resultCh <- v:
+				}
+			}
+		}
+	}()
+
+	return resultCh
+}
+
+func handleStage(done In, stage Stage, in In) Out {
+	outCh := make(Bi)
+
+	go func() {
+		defer func() {
+			close(outCh)
+			<-in // for TestAllStageStop
+		}()
+
+		for {
+			select {
+			case <-done:
+				return
+			case v, ok := <-in:
+				if !ok {
+					return
+				}
+
+				select {
+				case <-done:
+					return
+				case outCh <- v:
+				}
+			}
+		}
+	}()
+
+	return stage(outCh)
 }
