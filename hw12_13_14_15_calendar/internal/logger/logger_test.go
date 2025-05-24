@@ -22,7 +22,7 @@ func TestNewLogger_Levels(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			logger := NewLogger(tt.level)
+			logger := NewLogger(tt.level, "tests")
 			if logger.Handler().Enabled(context.TODO(), tt.expected) != true {
 				t.Errorf("Expected level %v, but logger is not enabled for this level", tt.expected)
 			}

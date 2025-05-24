@@ -13,7 +13,7 @@ type Logger interface {
 	Error(msg string, args ...any)
 }
 
-func NewLogger(level string) *slog.Logger {
+func NewLogger(level, serviceName string) *slog.Logger {
 	var l slog.Level
 	switch strings.ToLower(level) {
 	case "debug":
@@ -32,5 +32,7 @@ func NewLogger(level string) *slog.Logger {
 		Level: l,
 	}
 
-	return slog.New(slog.NewJSONHandler(os.Stdout, &logOpts))
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &logOpts))
+
+	return logger.With(slog.String("service", serviceName))
 }
