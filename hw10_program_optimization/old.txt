@@ -1,0 +1,11 @@
+goos: linux
+goarch: amd64
+pkg: github.com/AndreyNagorskiy/otus-go-hw/hw10_program_optimization
+cpu: 12th Gen Intel(R) Core(TM) i5-12450H
+BenchmarkGetDomainStat-12    	      75	 145791919 ns/op	242445547 B/op	 2500078 allocs/op
+BenchmarkGetDomainStat-12    	      80	 145969414 ns/op	242445465 B/op	 2500078 allocs/op
+BenchmarkGetDomainStat-12    	      81	 153663384 ns/op	242445451 B/op	 2500078 allocs/op
+BenchmarkGetDomainStat-12    	      70	 158391686 ns/op	242445418 B/op	 2500078 allocs/op
+BenchmarkGetDomainStat-12    	      74	 158471372 ns/op	242445451 B/op	 2500078 allocs/op
+PASS
+ok  	github.com/AndreyNagorskiy/otus-go-hw/hw10_program_optimization	60.543s

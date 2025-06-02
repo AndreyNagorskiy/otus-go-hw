@@ -1,0 +1,18 @@
+goos: linux
+goarch: amd64
+pkg: github.com/AndreyNagorskiy/otus-go-hw/hw10_program_optimization
+cpu: 12th Gen Intel(R) Core(TM) i5-12450H
+                 │    old.txt     │               new.txt               │
+                 │     sec/op     │    sec/op     vs base               │
+GetDomainStat-12   153.663m ± ∞ ¹   4.672m ± ∞ ¹  -96.96% (p=0.008 n=5)
+¹ need >= 6 samples for confidence interval at level 0.95
+
+                 │      old.txt       │                new.txt                │
+                 │        B/op        │     B/op       vs base                │
+GetDomainStat-12   236763.136Ki ± ∞ ¹   6.353Ki ± ∞ ¹  -100.00% (p=0.008 n=5)
+¹ need >= 6 samples for confidence interval at level 0.95
+
+                 │     old.txt      │               new.txt               │
+                 │    allocs/op     │  allocs/op   vs base                │
+GetDomainStat-12   2500078.00 ± ∞ ¹   84.00 ± ∞ ¹  -100.00% (p=0.008 n=5)
+¹ need >= 6 samples for confidence interval at level 0.95
