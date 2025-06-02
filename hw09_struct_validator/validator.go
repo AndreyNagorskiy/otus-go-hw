@@ -65,11 +65,7 @@ func Validate(v interface{}) error {
 
 		rules, err := parseValidationRules(validateTag)
 		if err != nil {
-			validationErrors = append(validationErrors, ValidationError{
-				Field: field.Name,
-				Err:   err,
-			})
-			continue
+			return fmt.Errorf("invalid validation rules for field %s: %w", field.Name, err)
 		}
 
 		value := refValue.Field(i)
@@ -78,6 +74,8 @@ func Validate(v interface{}) error {
 			var verr ValidationErrors
 			if errors.As(err, &verr) {
 				validationErrors = append(validationErrors, verr...)
+			} else {
+				return fmt.Errorf("validation error for field %s: %w", field.Name, err)
 			}
 		}
 	}
