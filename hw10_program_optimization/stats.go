@@ -2,9 +2,9 @@ package hw10programoptimization
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	jsoniter "github.com/json-iterator/go"
 )
@@ -24,48 +24,30 @@ type User struct {
 type DomainStat map[string]int
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers(r)
-	if err != nil {
-		return nil, fmt.Errorf("get users error: %w", err)
-	}
-	return countDomains(u, domain)
-}
+	result := make(DomainStat)
+	var mutex sync.Mutex
 
-type users [100_000]User
-
-func getUsers(r io.Reader) (result users, err error) {
-	i := 0
 	scanner := bufio.NewScanner(r)
 	for scanner.Scan() {
 		var user User
 		if err := json.Unmarshal(scanner.Bytes(), &user); err != nil {
-			return result, err
+			return nil, err
 		}
-		result[i] = user
-		i++
+
+		if strings.HasSuffix(user.Email, "."+domain) {
+			emailParts := strings.SplitN(user.Email, "@", 2)
+			if len(emailParts) == 2 {
+				domain := strings.ToLower(emailParts[1])
+				mutex.Lock()
+				result[domain]++
+				mutex.Unlock()
+			}
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
-		return result, err
+		return nil, err
 	}
 
-	return result, err
-}
-
-func countDomains(u users, domain string) (DomainStat, error) {
-	result := make(DomainStat)
-
-	for _, user := range u {
-		email := user.Email
-		at := strings.LastIndexByte(email, '@')
-		if at == -1 || at+1 >= len(email) {
-			continue // нет '@' или ничего после него
-		}
-
-		domainPart := strings.ToLower(email[at+1:])
-		if strings.HasSuffix(domainPart, domain) {
-			result[domainPart]++
-		}
-	}
 	return result, nil
 }
