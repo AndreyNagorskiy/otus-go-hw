@@ -3,7 +3,10 @@ package hw09structvalidator
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 type UserRole string
@@ -42,19 +45,113 @@ func TestValidate(t *testing.T) {
 		expectedErr error
 	}{
 		{
-			// Place your code here.
+			in: User{
+				ID:     strings.Repeat("1", 36),
+				Name:   "Test",
+				Age:    14,
+				Email:  "example@example",
+				Role:   "invalid",
+				Phones: []string{"78000000001", "780"},
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "Age",
+					Err:   ErrValidateMin,
+				},
+				ValidationError{
+					Field: "Email",
+					Err:   ErrValidateRegexp,
+				},
+				ValidationError{
+					Field: "Role",
+					Err:   ErrValidateIn,
+				},
+				ValidationError{
+					Field: "Phones",
+					Err:   ErrValidateLen,
+				},
+			},
 		},
-		// ...
-		// Place your code here.
+		{
+			in: App{
+				Version: "1.2.3.4",
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "Version",
+					Err:   ErrValidateLen,
+				},
+			},
+		},
+		{
+			in: Response{
+				Code: 301,
+				Body: "test",
+			},
+			expectedErr: ValidationErrors{
+				ValidationError{
+					Field: "Code",
+					Err:   ErrValidateIn,
+				},
+			},
+		},
 	}
 
 	for i, tt := range tests {
-		t.Run(fmt.Sprintf("case %d", i), func(t *testing.T) {
+		t.Run(fmt.Sprintf("negative case %d", i), func(t *testing.T) {
 			tt := tt
 			t.Parallel()
 
-			// Place your code here.
-			_ = tt
+			err := Validate(tt.in)
+			require.Equal(t, tt.expectedErr, err)
+		})
+	}
+
+	tests = []struct {
+		in          interface{}
+		expectedErr error
+	}{
+		{
+			in: User{
+				ID:     strings.Repeat("1", 36),
+				Name:   "Test",
+				Age:    20,
+				Email:  "example@example.com",
+				Role:   "admin",
+				Phones: []string{"78000000001", "78000000002"},
+			},
+			expectedErr: nil,
+		},
+		{
+			in: App{
+				Version: "1.2.3",
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Response{
+				Code: 200,
+				Body: "test",
+			},
+			expectedErr: nil,
+		},
+		{
+			in: Token{
+				Header:    []byte("1"),
+				Payload:   []byte("2"),
+				Signature: []byte("3"),
+			},
+			expectedErr: nil,
+		},
+	}
+
+	for i, tt := range tests {
+		t.Run(fmt.Sprintf("positive case %d", i), func(t *testing.T) {
+			tt := tt
+			t.Parallel()
+
+			err := Validate(tt.in)
+			require.Equal(t, tt.expectedErr, err)
 		})
 	}
 }
